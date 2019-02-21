@@ -16,7 +16,6 @@
  */
 
 module.exports = {
-    core: require('libdec/core'),
     archs: require('libdec/archs'),
     context: require('libdec/context'),
     supported: function() {

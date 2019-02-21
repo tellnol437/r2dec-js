@@ -29,10 +29,7 @@
  * @type {Object}
  */
 var Global = {
-    context: null,
     evars: null,
-    printer: null,
-    argdb: null,
     warning: require('libdec/warning')
 };
 
@@ -40,15 +37,14 @@ var Global = {
 /**
  * Imports.
  */
-var libdec = require('libdec/libdec');
-var r2util = require('libdec/r2util');
+const libdec = require('libdec/libdec');
+const r2util = require('libdec/r2util');
 
 /**
  * r2dec main function.
  * @param  {Array} args - r2dec arguments to be used to configure the output.
  */
 function r2dec_main(args) {
-    var Printer = require('libdec/printer');
     try {
         Global.evars = new r2util.evars(args);
         r2util.sanitize(true, Global.evars);
@@ -57,24 +53,13 @@ function r2dec_main(args) {
             return;
         }
 
-        // theme (requires to be initialized after evars)
-        Global.printer = new Printer();
-
-        var architecture = libdec.archs[Global.evars.arch];
+        const architecture = libdec.archs[Global.evars.arch];
 
         if (architecture) {
             var data = new r2util.data();
-            Global.context = new libdec.context();
-            Global.argdb = data.argdb;
-            // af seems to break renaming.
-            /* asm.pseudo breaks things.. */
             if (data.graph && data.graph.length > 0) {
-                var p = new libdec.core.session(data, architecture);
-                var arch_context = architecture.context(data);
-                libdec.core.analysis.pre(p, architecture, arch_context);
-                libdec.core.decompile(p, architecture, arch_context);
-                libdec.core.analysis.post(p, architecture, arch_context);
-                libdec.core.print(p);
+                var p = new libdec.context(data, architecture);
+                p.dump();
             } else {
                 console.log('Error: no data available.\nPlease analyze the function/binary first.');
             }

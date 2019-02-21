@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017-2018 deroad
+ * Copyright (C) 2017-2019 deroad
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +16,13 @@
  */
 
 module.exports = {
-    arm: require('libdec/arch/arm'),
-    avr: require('libdec/arch/avr'),
-    m68k: require('libdec/arch/m68k'),
-    mips: require('libdec/arch/mips'),
-    ppc: require('libdec/arch/ppc'),
-    sparc: require('libdec/arch/sparc'),
-    v850: require('libdec/arch/v850'),
-    wasm: require('libdec/arch/wasm'),
+    //arm: require('libdec/arch/arm'),
+    //avr: require('libdec/arch/avr'),
+    //m68k: require('libdec/arch/m68k'),
+    //mips: require('libdec/arch/mips'),
+    //ppc: require('libdec/arch/ppc'),
+    //sparc: require('libdec/arch/sparc'),
+    //v850: require('libdec/arch/v850'),
+    //wasm: require('libdec/arch/wasm'),
     x86: require('libdec/arch/x86')
 };

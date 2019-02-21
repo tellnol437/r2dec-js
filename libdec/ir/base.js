@@ -20,67 +20,67 @@ module.exports = (function() {
     const Throw = require('libdec/throw');
 
     return {
-        add: function(dst, src_a, src_b) {
+        add: function(location, dst, src_a, src_b) {
             Throw.IsNull(dst, 'add.dst');
             Throw.IsNull(src_a, 'add.src_a');
             Throw.IsNull(src_b, 'add.src_b');
-            return [new IR.Add([dst, src_a, src_b])];
+            return [new IR.Add(location, [dst, src_a, src_b])];
         },
-        subtract: function(dst, src_a, src_b) {
+        subtract: function(location, dst, src_a, src_b) {
             Throw.IsNull(dst, 'add.dst');
             Throw.IsNull(src_a, 'add.src_a');
             Throw.IsNull(src_b, 'add.src_b');
-            return [new IR.Subtract([dst, src_a, src_b])];
+            return [new IR.Subtract(location, [dst, src_a, src_b])];
         },
-        assign: function(dst, src) {
+        assign: function(location, dst, src) {
             Throw.IsNull(dst, 'assign.dst');
             Throw.IsNull(src, 'assign.src');
-            return [new IR.Assign([dst, src])];
+            return [new IR.Assign(location, [dst, src])];
         },
-        stack_pop: function(dst) {
+        stack_pop: function(location, dst) {
             Throw.IsNull(dst, 'stack_pop.dst');
-            return [new IR.StackPop([dst])];
+            return [new IR.StackPop(location, [dst])];
         },
-        stack_push: function(src) {
+        stack_push: function(location, src) {
             Throw.IsNull(src, 'stack_push.src');
-            return [new IR.StackPush([src])];
+            return [new IR.StackPush(location, [src])];
         },
         /* MEMORY */
-        read_memory: function(pointer, register, bits, signed) {
+        read_memory: function(location, pointer, register, bits, signed) {
             Throw.IsNull(pointer, 'read_memory.pointer');
             Throw.IsNull(register, 'read_memory.register');
             Throw.IsNull(bits, 'read_memory.bits');
             if (signed) {
-                return [new IR.Read(bits, [register, pointer]), new IR.ExtendSign([register])];
+                return [new IR.Read(location, bits, [register, pointer]), new IR.ExtendSign(null, [register])];
             }
-            return [new IR.Read(bits, [register, pointer])];
+            return [new IR.Read(location, bits, [register, pointer])];
         },
-        write_memory: function(pointer, register, bits, signed) {
+        write_memory: function(location, pointer, register, bits, signed) {
             Throw.IsNull(pointer, 'read_memory.pointer');
             Throw.IsNull(register, 'read_memory.register');
             Throw.IsNull(bits, 'read_memory.bits');
             if (signed) {
-                return [new IR.ExtendSign([register]), new IR.Write(bits, [register, pointer])];
+                return [new IR.ExtendSign(location, [register]), new IR.Write(null, bits, [register, pointer])];
             }
-            return [new IR.Write(bits, [register, pointer])];
+            return [new IR.Write(location, bits, [register, pointer])];
         },
-        jump: function(address) {
+        jump: function(location, address) {
             Throw.IsNull(address, 'jump.address');
-            return [new IR.Jump(null, [address])];
+            return [new IR.Jump(location, null, [address])];
         },
-        jump_condition: function(address, condition) {
+        jump_condition: function(location, address, condition) {
             Throw.IsNull(address, 'jump.address');
             Throw.IsNull(condition, 'jump.condition');
-            return [new IR.Jump(condition, [address])];
+            return [new IR.Jump(location, condition, [address])];
         },
-        compare: function(dst, src_a, src_b) {
+        compare: function(location, dst, src_a, src_b) {
             Throw.IsNull(dst, 'add.dst');
             Throw.IsNull(src_a, 'add.src_a');
             Throw.IsNull(src_b, 'add.src_b');
-            return [new IR.Compare([dst, src_a, src_b])];
+            return [new IR.Compare(location, [dst, src_a, src_b])];
         },
-        return: function() {
-            return [new IR.Return(Array.prototype.slice.call(arguments))];
+        return: function(location) {
+            return [new IR.Return(location, Array.prototype.slice.call(arguments, 1))];
         },
         compose: function(ops) {
             Throw.IsNull(ops, 'compose.ops');
@@ -90,11 +90,11 @@ module.exports = (function() {
             });
             return cops;
         },
-        unknown: function(operands) {
+        unknown: function(location, operands) {
             if (!Array.isArray(operands)) {
                 operands = [operands];
             }
-            return [new IR.Illegal(operands)];
+            return [new IR.Illegal(location, operands)];
         },
         nop: function() {
             return [];

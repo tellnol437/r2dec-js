@@ -191,11 +191,11 @@ module.exports = (function() {
      * @param  {Array}  ops   Array of ops
      * @return {Object}       Operand
      */
-    function _memory_composed(value, ops) {
+    function _memory_composed(location, value, ops) {
         var cmp_arg = _reg(value.token) || _imm(_check_known_neg(value.token));
         if (value.mem_access) {
             var tmp = new Operand.TempRegister(value.mem_access);
-            ops.push(Base.read_memory(cmp_arg, tmp, value.mem_access, true));
+            ops.push(Base.read_memory(location, cmp_arg, tmp, value.mem_access, true));
             cmp_arg = tmp;
         }
         return cmp_arg;
@@ -211,9 +211,9 @@ module.exports = (function() {
      */
     function _math_common(instr, op, flags) {
         var ops = [],
-            dst = _memory_composed(_op(instr, 0), ops),
-            src = _memory_composed(_op(instr, 1), ops);
-        ops.push(op(dst, dst, src));
+            dst = _memory_composed(instr.location, _op(instr, 0), ops),
+            src = _memory_composed(instr.location, _op(instr, 1), ops);
+        ops.push(op(instr.location, dst, dst, src));
         return Base.compose(ops);
     }
 
@@ -227,7 +227,7 @@ module.exports = (function() {
         //if (instr.is_jumping_externally(instructions)) {
         //    return Base.jump_condition(_imm2(instr, 0), type);
         //}
-        return Base.jump_condition(_imm2(instr, 0), type);
+        return Base.jump_condition(instr.location, _imm2(instr, 0), type);
     };
 
     function _standard_mov(instr) {
@@ -235,18 +235,18 @@ module.exports = (function() {
         var src = _op(instr, 1);
 
         if (dst.mem_access) {
-            return Base.write_memory(_reg(dst.token) || _imm(dst.token), _reg(src.token) || _imm(src.token), dst.mem_access, true);
+            return Base.write_memory(instr.location, _reg(dst.token) || _imm(dst.token), _reg(src.token) || _imm(src.token), dst.mem_access, true);
         } else if (src.mem_access) {
-            return Base.read_memory(_reg(src.token) || _imm(src.token), _reg(dst.token) || _imm(dst.token), src.mem_access, true);
+            return Base.read_memory(instr.location, _reg(src.token) || _imm(src.token), _reg(dst.token) || _imm(dst.token), src.mem_access, true);
         } else {
             if (src.mem_access) {
                 var tmp = new Operand.TempRegister(src.mem_access);
                 return Base.compose([
-                    Base.read_memory(_reg(src.token) || _imm(src.token), tmp, src.mem_access, false),
-                    Base.assign(_reg(dst.token), tmp)
+                    Base.read_memory(instr.location, _reg(src.token) || _imm(src.token), tmp, src.mem_access, false),
+                    Base.assign(null, _reg(dst.token), tmp)
                 ]);
             }
-            return Base.assign(_reg(dst.token), _reg(src.token) || _imm(src.token));
+            return Base.assign(instr.location, _reg(dst.token), _reg(src.token) || _imm(src.token));
         }
     }
 
@@ -304,11 +304,11 @@ module.exports = (function() {
             },
             neg: function(instr) {
                 var dst = _ireg(instr, 0);
-                return Base.negate(dst, dst);
+                return Base.negate(instr.location, dst, dst);
             },
             not: function(instr) {
                 var dst = _ireg(instr, 0);
-                return Base.not(dst, dst);
+                return Base.not(instr.location, dst, dst);
             },
             /*
             div: function(instr) {
@@ -325,10 +325,10 @@ module.exports = (function() {
             },
             */
             push: function(instr, instructions) {
-                return Base.stack_push(_ireg(instr, 0));
+                return Base.stack_push(instr.location, _ireg(instr, 0));
             },
             pop: function(instr, instructions) {
-                return Base.stack_pop(_ireg(instr, 0));
+                return Base.stack_pop(instr.location, _ireg(instr, 0));
             },
             mov: _standard_mov,
             jmp: function(instr, instructions) {
@@ -349,7 +349,7 @@ module.exports = (function() {
                 }
                 */
                 // indirect jump through a register or an offset to register
-                return Base.jump(_ireg(instr, 0) || _imm(dst.token));
+                return Base.jump(instr.location, _ireg(instr, 0) || _imm(dst.token));
             },
             jne: function(i, is) {
                 return _jcc_common(i, is, Condition.NE);
@@ -389,26 +389,26 @@ module.exports = (function() {
             },
             cmp: function(instr) {
                 var ops = [],
-                    a = _memory_composed(_op(instr, 0), ops),
-                    b = _memory_composed(_op(instr, 1), ops);
-                ops.push(Base.compare(FlagsReg, a, b));
+                    a = _memory_composed(instr.location, _op(instr, 0), ops),
+                    b = _memory_composed(instr.location, _op(instr, 1), ops);
+                ops.push(Base.compare(instr.location, FlagsReg, a, b));
                 return Base.compose(ops);
             },
             test: function(instr) {
                 var tmp = null,
                     ops = [],
-                    a = _memory_composed(_op(instr, 0), ops),
-                    b = _memory_composed(_op(instr, 1), ops);
+                    a = _memory_composed(instr.location, _op(instr, 0), ops),
+                    b = _memory_composed(instr.location, _op(instr, 1), ops);
                 if (a != b) {
                     tmp = new Operand.TempRegister(Math.max(a.size, b.size));
-                    ops.push(Base.and(tmp, a, b));
+                    ops.push(Base.and(instr.location, tmp, a, b));
                     a = tmp;
                 }
-                ops.push(Base.compare(FlagsReg, a, _imm('0')));
+                ops.push(Base.compare(instr.location, FlagsReg, a, _imm('0')));
                 return Base.compose(ops);
             },
-            ret: function() {
-                return Base.return();
+            ret: function(instr) {
+                return Base.return(instr.location);
             },
             invalid: function() {
                 return Base.nop();

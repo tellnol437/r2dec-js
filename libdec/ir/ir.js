@@ -16,109 +16,115 @@
  */
 
 module.exports = (function() {
-    function Opcode(name, operands) {
+    const Long = require('libdec/long');
+
+    function Opcode(location, name, operands) {
+        this.location = location || Long.MAX_UNSIGNED_VALUE;
         this.name = name;
         this.operands = operands || [];
         this.toString = function() {
             return '[Opcode ' + [this.name].concat(this.operands).join(' ') + ']';
         };
+        this.at = function(offset) {
+            return (offset && offset != Long.MAX_UNSIGNED_VALUE) ? this.location.eq(offset) : false;
+        };
     }
 
-    function Illegal(operands) {
-        Opcode.call(this, 'illegal', operands);
+    function Illegal(location, operands) {
+        Opcode.call(this, location, 'illegal', operands);
     }
 
     /*****************************************
      * Math operations
      *****************************************/
 
-    function Increase(operands) {
-        Opcode.call(this, '++', operands);
+    function Increase(location, operands) {
+        Opcode.call(this, location, '++', operands);
     }
 
-    function Decrease(operands) {
-        Opcode.call(this, '--', operands);
+    function Decrease(location, operands) {
+        Opcode.call(this, location, '--', operands);
     }
 
-    function Add(operands) {
-        Opcode.call(this, '+', operands);
+    function Add(location, operands) {
+        Opcode.call(this, location, '+', operands);
     }
 
-    function Subtract(operands) {
-        Opcode.call(this, '-', operands);
+    function Subtract(location, operands) {
+        Opcode.call(this, location, '-', operands);
     }
 
-    function Multiply(operands) {
-        Opcode.call(this, '*', operands);
+    function Multiply(location, operands) {
+        Opcode.call(this, location, '*', operands);
     }
 
-    function Divide(operands) {
-        Opcode.call(this, '/', operands);
+    function Divide(location, operands) {
+        Opcode.call(this, location, '/', operands);
     }
 
-    function Module(operands) {
-        Opcode.call(this, '%', operands);
+    function Module(location, operands) {
+        Opcode.call(this, location, '%', operands);
     }
 
-    function And(operands) {
-        Opcode.call(this, '&', operands);
+    function And(location, operands) {
+        Opcode.call(this, location, '&', operands);
     }
 
-    function Or(operands) {
-        Opcode.call(this, '|', operands);
+    function Or(location, operands) {
+        Opcode.call(this, location, '|', operands);
     }
 
-    function Xor(operands) {
-        Opcode.call(this, '^', operands);
+    function Xor(location, operands) {
+        Opcode.call(this, location, '^', operands);
     }
 
-    function LeftShift(operands) {
-        Opcode.call(this, '<<', operands);
+    function LeftShift(location, operands) {
+        Opcode.call(this, location, '<<', operands);
     }
 
-    function RightShift(operands) {
-        Opcode.call(this, '>>', operands);
+    function RightShift(location, operands) {
+        Opcode.call(this, location, '>>', operands);
     }
 
-    function LeftRotate(operands) {
-        Opcode.call(this, 'rotl', operands);
+    function LeftRotate(location, operands) {
+        Opcode.call(this, location, 'rotl', operands);
     }
 
-    function RightRotate(operands) {
-        Opcode.call(this, 'rotr', operands);
+    function RightRotate(location, operands) {
+        Opcode.call(this, location, 'rotr', operands);
     }
 
-    function Negate(operands) {
-        Opcode.call(this, '=-', operands);
+    function Negate(location, operands) {
+        Opcode.call(this, location, '=-', operands);
     }
 
-    function Not(operands) {
-        Opcode.call(this, '=~', operands);
+    function Not(location, operands) {
+        Opcode.call(this, location, '=~', operands);
     }
 
-    function Assign(operands) {
-        Opcode.call(this, '=', operands);
+    function Assign(location, operands) {
+        Opcode.call(this, location, '=', operands);
     }
 
-    function Swap(operands) {
-        Opcode.call(this, 'swap', operands);
+    function Swap(location, operands) {
+        Opcode.call(this, location, 'swap', operands);
     }
 
-    function BitMask(operands) {
-        Opcode.call(this, 'swap', operands);
+    function BitMask(location, operands) {
+        Opcode.call(this, location, 'swap', operands);
     }
 
     /*****************************************
      * Memory
      *****************************************/
 
-    function Read(bits, operands) {
-        Opcode.call(this, 'read', operands);
+    function Read(location, bits, operands) {
+        Opcode.call(this, location, 'read', operands);
         this.bits = bits;
     }
 
-    function Write(bits, operands) {
-        Opcode.call(this, 'write', operands);
+    function Write(location, bits, operands) {
+        Opcode.call(this, location, 'write', operands);
         this.bits = bits;
     }
 
@@ -126,29 +132,35 @@ module.exports = (function() {
      * Stack (Memory)
      *****************************************/
 
-    function StackPush(operands) {
-        Opcode.call(this, 'push', operands);
+    function StackPush(location, operands) {
+        Opcode.call(this, location, 'push', operands);
     }
 
-    function StackPop(operands) {
-        Opcode.call(this, 'pop', operands);
+    function StackPop(location, operands) {
+        Opcode.call(this, location, 'pop', operands);
     }
 
     /*****************************************
      * Logic
      *****************************************/
 
-    function Return(operands) {
-        Opcode.call(this, 'return', operands);
+    function Return(location, operands) {
+        Opcode.call(this, location, 'return', operands);
     }
 
-    function Jump(condition, operands) {
-        Opcode.call(this, condition ? 'cjump' : 'jump', operands);
-        this.condition = condition;
+    function Jump(location, condition, operands) {
+        if (condition) {
+            operands.push(condition);
+        }
+        Opcode.call(this, location, condition ? 'cjump' : 'jump', operands);
     }
 
-    function Compare(operands) {
-        Opcode.call(this, 'cmp', operands);
+    Jump.is = function(opcode) {
+        return opcode && opcode.name ? opcode.name.indexOf('jump') >= 0 : false;
+    };
+
+    function Compare(location, operands) {
+        Opcode.call(this, location, 'cmp', operands);
     }
 
     /*****************************************
@@ -156,13 +168,13 @@ module.exports = (function() {
      *****************************************/
 
     // from unsigned to signed
-    function ExtendSign(operands) {
-        Opcode.call(this, 'extsign', operands);
+    function ExtendSign(location, operands) {
+        Opcode.call(this, location, 'extsign', operands);
     }
 
     // from signed to unsigned
-    function ExtendZero(operands) {
-        Opcode.call(this, 'extzero', operands);
+    function ExtendZero(location, operands) {
+        Opcode.call(this, location, 'extzero', operands);
     }
 
     return {

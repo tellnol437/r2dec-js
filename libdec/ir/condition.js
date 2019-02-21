@@ -16,50 +16,25 @@
  */
 
 module.exports = (function() {
+    function Condition(cmp, signed) {
+        this.cmp = cmp;
+        this.signed = signed;
+        this.toString = function() {
+            return '[Condition ' + [this.cmp, this.signed ? 'signed' : 'unsigned'].join(' ') + ']';
+        };
+    }
+
     return {
-        OVERFLOW: {
-            cmp: 'OF',
-            signed: true
-        },
-        NE: {
-            cmp: 'NE',
-            signed: false
-        },
-        EQ: {
-            cmp: 'EQ',
-            signed: false
-        },
-        LT_S: {
-            cmp: 'LT',
-            signed: true
-        },
-        LE_S: {
-            cmp: 'LE',
-            signed: true
-        },
-        GT_S: {
-            cmp: 'GT',
-            signed: true
-        },
-        GE_S: {
-            cmp: 'GE',
-            signed: true
-        },
-        LT_U: {
-            cmp: 'LT',
-            signed: false
-        },
-        LE_U: {
-            cmp: 'LE',
-            signed: false
-        },
-        GT_U: {
-            cmp: 'GT',
-            signed: false
-        },
-        GE_U: {
-            cmp: 'GE',
-            signed: false
-        },
+        OVERFLOW: new Condition('OF', true),
+        NE: new Condition('NE', false),
+        EQ: new Condition('EQ', false),
+        LT_S: new Condition('LT', true),
+        LE_S: new Condition('LE', true),
+        GT_S: new Condition('GT', true),
+        GE_S: new Condition('GE', true),
+        LT_U: new Condition('LT', false),
+        LE_U: new Condition('LE', false),
+        GT_U: new Condition('GT', false),
+        GE_U: new Condition('GE', false),
     };
 })();

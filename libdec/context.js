@@ -16,8 +16,22 @@
  */
 
 module.exports = (function() {
+    const IR = require('libdec/ir/ir');
     const Base = require('libdec/ir/base');
     const Instruction = require('libdec/instruction');
+    const Long = require('libdec/long');
+
+    function find_jump(instr, instructions) {
+        if (!Long.isLong(instr.operands[0].value)) {
+            return instr.operands[0].value;
+        }
+        for (var i = 0; i < instructions.length; i++) {
+            if (instructions[i].at(instr.operands[0].value)) {
+                return i;
+            }
+        }
+        return instr.operands[0].value;
+    }
 
     /**
      * Initialize the data given as input
@@ -26,7 +40,7 @@ module.exports = (function() {
      * @param  {Object} architecture Architecture object
      */
     function initialize_data(context, data, architecture) {
-        var block, i, instructions, instr, ir, func;
+        var block, i, instructions, instr, ir, func, address;
         instructions = [];
         data = data.graph[0];
         for (i = 0; i < data.blocks.length; i++) {
@@ -53,6 +67,18 @@ module.exports = (function() {
             ir.forEach(function(e) {
                 context.instructions.push(e);
             });
+        }
+        address = null;
+        for (i = 0; i < context.instructions.length; i++) {
+            instr = context.instructions[i];
+            if (address && instr.at(address)) {
+                instr.location = Long.MAX_UNSIGNED_VALUE;
+            } else if (!instr.location.eq(Long.MAX_UNSIGNED_VALUE)) {
+                address = instr.location;
+            }
+            if (IR.Jump.is(instructions[i])) {
+                var index = find_jump(instructions[i], instructions);
+            }
         }
     }
 

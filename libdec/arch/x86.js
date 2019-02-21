@@ -330,6 +330,24 @@ module.exports = (function() {
             pop: function(instr, instructions) {
                 return Base.stack_pop(instr.location, _ireg(instr, 0));
             },
+            lea: function(instr, context) {
+                var ops = [];
+                var dst = _op(instr, 0);
+                /*
+                var val = _op(instr, 1);
+
+                // compilers like to perform calculations using 'lea' instructions in the
+                // following form: [reg + reg*n] --> reg * (n+1)
+                var calc = val.token.match(/([re]?(?:[abcd]x|[ds]i)|r(?:1[0-5]|[8-9])[lwd]?)\s*\+\s*\1\s*\*(\d)/);
+
+                if (calc) {
+                    return Base.multiply(instr.location, dst.token, calc[1], parseInt(calc[2]) + 1 + '');
+                }
+                */
+                val = _memory_composed(instr.location, _op(instr, 1), ops);
+                ops.push(Base.assign(instr.location, _reg(dst.token), val));
+                return Base.compose(ops);
+            },
             mov: _standard_mov,
             jmp: function(instr, instructions) {
                 var dst = _op(instr, 0);

@@ -32,6 +32,34 @@ module.exports = (function() {
             Throw.IsNull(src_b, 'add.src_b');
             return [new IR.Subtract(location, [dst, src_a, src_b])];
         },
+        and: function(location, dst, src_a, src_b) {
+            Throw.IsNull(dst, 'and.dst');
+            Throw.IsNull(src_a, 'and.src_a');
+            Throw.IsNull(src_b, 'and.src_b');
+            return [new IR.And(location, [dst, src_a, src_b])];
+        },
+        or: function(location, dst, src_a, src_b) {
+            Throw.IsNull(dst, 'or.dst');
+            Throw.IsNull(src_a, 'or.src_a');
+            Throw.IsNull(src_b, 'or.src_b');
+            return [new IR.Or(location, [dst, src_a, src_b])];
+        },
+        xor: function(location, dst, src_a, src_b) {
+            Throw.IsNull(dst, 'xor.dst');
+            Throw.IsNull(src_a, 'xor.src_a');
+            Throw.IsNull(src_b, 'xor.src_b');
+            return [new IR.Xor(location, [dst, src_a, src_b])];
+        },
+        negate: function(location, dst, src) {
+            Throw.IsNull(dst, 'xor.dst');
+            Throw.IsNull(src, 'xor.src');
+            return [new IR.Negate(location, [dst, src])];
+        },
+        not: function(location, dst, src) {
+            Throw.IsNull(dst, 'not.dst');
+            Throw.IsNull(src, 'not.src');
+            return [new IR.Not(location, [dst, src])];
+        },
         assign: function(location, dst, src) {
             Throw.IsNull(dst, 'assign.dst');
             Throw.IsNull(src, 'assign.src');

@@ -60,9 +60,9 @@ module.exports = (function() {
             func = architecture.instructions[instr.parsed.mnem];
             if (func) {
                 console.log(instr.simplified);
-                ir = func(instr, instructions) || Base.unknown(instr.assembly);
+                ir = func(instr, instructions) || Base.unknown(instr.location, instr.assembly);
             } else {
-                ir = Base.unknown(instr.assembly);
+                ir = Base.unknown(instr.location, instr.assembly);
             }
             ir.forEach(function(e) {
                 context.instructions.push(e);

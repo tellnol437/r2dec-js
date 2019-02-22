@@ -26,7 +26,7 @@ module.exports = (function() {
 		this.location = data.offset;
 		this.simplified = data.disasm || data.opcode;
 		this.assembly = data.opcode;
-		this.parsed = architecture.parse(data.disasm, data.opcode);
+		this.parsed = architecture.parse( /*data.disasm, */ data.opcode);
 		this.comments = data.comment ? [atob(data.comment)] : [];
 	}
 	Instruction.prototype.is_valid = function() {

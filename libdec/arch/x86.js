@@ -26,7 +26,7 @@ module.exports = (function() {
      * x86_x64 flags register
      * @type {Object}
      */
-    const FlagsReg = new Operand.Register('flags', 64);
+    const FlagsReg = new Operand.Register('rflags', 64);
 
     /**
      * Convert known magic values known to represent negative numbers.
@@ -124,6 +124,25 @@ module.exports = (function() {
         'r15d': new Operand.Register('r15d', 32),
         'r15w': new Operand.Register('r15w', 16),
         'r15b': new Operand.Register('r15b', 8),
+        'rip': new Operand.Register('rip', 64),
+        'eip': new Operand.Register('eip', 32),
+        'ip': new Operand.Register('ip', 16),
+        'cs': new Operand.Register('cs', 16),
+        'ss': new Operand.Register('ss', 16),
+        'ds': new Operand.Register('ds', 16),
+        'es': new Operand.Register('es', 16),
+        'fs': new Operand.Register('fs', 16),
+        'gs': new Operand.Register('gs', 16),
+        'tr': new Operand.Register('tr', 16),
+        'gdtr': new Operand.Register('gdtr', 16),
+        'idtr': new Operand.Register('idtr', 16),
+        'ldtr': new Operand.Register('ldtr', 16),
+    };
+
+    const math_ops = {
+        '+': Base.add,
+        '-': Base.subtract,
+        '*': Base.multiply,
     };
 
     /**
@@ -134,15 +153,6 @@ module.exports = (function() {
      */
     function _op(instr, index) {
         return instr.parsed.operands[index];
-    }
-
-    /**
-     * Returns mnemonic from a given instruction
-     * @param  {Object} instr Instruction object
-     * @return {String}       Mmnemonic
-     */
-    function _mnem(instr) {
-        return instr.parsed.mnem;
     }
 
     /**
@@ -185,6 +195,24 @@ module.exports = (function() {
         return _imm(_op(instr, index).token);
     }
 
+    function _multi_math(location, value, ops) {
+        var reg_a, reg_b;
+        var math = value.token.replace(/([+*-])/g, ' $1 ').replace(/\s+/g, ' ').split(' ');
+        if (math.length > 2) {
+            reg_a = _reg(math[0]) || _imm(math[0]);
+            reg_b = _reg(math[2]) || _imm(math[2]);
+            value = new Operand.TempRegister(reg_a.size);
+            ops.push(math_ops[math[1]](location, value, reg_a, reg_b));
+            if (math.length > 3) {
+                reg_b = _reg(math[4]) || _imm(math[4]);
+                ops.push(math_ops[math[3]](location, value, value, reg_b));
+            }
+        } else {
+            value = _reg(value.token) || _imm(value.token);
+        }
+        return value;
+    }
+
     /**
      * Is used internally to return a register or a temporaru memory operand
      * @param  {Object} value Parsed json
@@ -192,11 +220,14 @@ module.exports = (function() {
      * @return {Object}       Operand
      */
     function _memory_composed(location, value, ops) {
-        var cmp_arg = _reg(value.token) || _imm(_check_known_neg(value.token));
-        if (value.mem_access) {
-            var tmp = new Operand.TempRegister(value.mem_access);
-            ops.push(Base.read_memory(location, cmp_arg, tmp, value.mem_access, true));
+        var cmp_arg = _reg(value.token);
+        if (!cmp_arg && value.mem_access) {
+            value = _multi_math(location, value, ops);
+            var tmp = new Operand.TempRegister(value.size);
+            ops.push(Base.read_memory(location, value, tmp, value.size, true));
             cmp_arg = tmp;
+        } else {
+            cmp_arg = _imm(_check_known_neg(value.token));
         }
         return cmp_arg;
     }
@@ -218,6 +249,61 @@ module.exports = (function() {
     }
 
     /**
+     * Handles arithmetic divisions.
+     * @param {Object} p Parsed instruction structure
+     * @param {boolean} signed Signed operation or operands
+     * @param {Object} context Context object
+     */
+    var _math_divide = function(instr, signed) {
+        var l = instr.location;
+        var divisor = _op(instr, 0);
+        var osize = divisor.mem_access || _reg(divisor.token).size;
+
+        var dividend = {
+            8: ['ax'],
+            16: ['dx', 'ax'],
+            32: ['edx', 'eax'],
+            64: ['rdx', 'rax']
+        }[osize];
+
+        var remainder = {
+            8: 'ah',
+            16: 'dx',
+            32: 'edx',
+            64: 'rdx',
+        }[osize];
+
+        var quotient = {
+            8: 'al',
+            16: 'ax',
+            32: 'eax',
+            64: 'rax'
+        }[osize];
+
+        var hi, low, ops = [];
+        if (osize > 8) {
+            hi = _reg(dividend[0]);
+            low = _reg(dividend[1]);
+            dividend = new Operand.TempRegister(osize);
+            ops.push(Base.shift_left(l, dividend, hi, osize));
+            ops.push(Base.or(l, dividend, dividend, low));
+        } else {
+            dividend = _reg(dividend[0]);
+        }
+        quotient = _reg(quotient);
+        remainder = _reg(remainder);
+        divisor = _reg(divisor.token);
+
+        // quotient = dividend / divisor
+        // remainder = dividend % divisor
+        return Base.compose([
+            Base.divide(l, quotient, dividend, divisor),
+            Base.module(l, remainder, dividend, divisor)
+        ]);
+    };
+
+
+    /**
      * Handles Jcc (conditional jump) instructions.
      * @param {Object} p Parsed instruction structure
      * @param {Object} context Context object
@@ -233,21 +319,38 @@ module.exports = (function() {
     function _standard_mov(instr) {
         var dst = _op(instr, 0);
         var src = _op(instr, 1);
-
+        var ops = [];
         if (dst.mem_access) {
-            return Base.write_memory(instr.location, _reg(dst.token) || _imm(dst.token), _reg(src.token) || _imm(src.token), dst.mem_access, true);
+            dst = _multi_math(instr.location, dst, ops);
+            ops.push(Base.write_memory(instr.location, dst, _reg(src.token) || _imm(src.token), dst.size, false));
+            return Base.compose(ops);
         } else if (src.mem_access) {
-            return Base.read_memory(instr.location, _reg(src.token) || _imm(src.token), _reg(dst.token) || _imm(dst.token), src.mem_access, true);
-        } else {
-            if (src.mem_access) {
-                var tmp = new Operand.TempRegister(src.mem_access);
-                return Base.compose([
-                    Base.read_memory(instr.location, _reg(src.token) || _imm(src.token), tmp, src.mem_access, false),
-                    Base.assign(null, _reg(dst.token), tmp)
-                ]);
-            }
-            return Base.assign(instr.location, _reg(dst.token), _reg(src.token) || _imm(src.token));
+            src = _multi_math(instr.location, src, ops);
+            ops.push(Base.read_memory(instr.location, src, _reg(dst.token) || _imm(dst.token), src.size, false));
+            return Base.compose(ops);
         }
+        return Base.assign(instr.location, _reg(dst.token), _reg(src.token) || _imm(src.token));
+    }
+
+    /**
+     * Hanldes assignments that require size extension.
+     * @param {Object}  instr   Parsed instruction structure
+     * @param {Boolean} signed  Signed operation
+     * @param {Object}  context Context structure
+     */
+    function _extended_mov(instr, signed) {
+        var dst = _op(instr, 0);
+        var src = _op(instr, 1);
+
+        if (src.mem_access) {
+            var ops = [];
+            src = _multi_math(instr.location, src, ops);
+            ops.push(Base.read_memory(instr.location, src, _reg(dst.token) || _imm(dst.token), src.size, signed));
+            return Base.compose(ops);
+        }
+        dst = _reg(dst.token) || _imm(dst.token);
+        src = _reg(src.token) || _imm(src.token);
+        return Base.extend_sign(instr.location, dst, src);
     }
 
     return {
@@ -310,18 +413,27 @@ module.exports = (function() {
                 var dst = _ireg(instr, 0);
                 return Base.not(instr.location, dst, dst);
             },
-            /*
+            cbw: function(instr, context) {
+                return Base.extend_sign(instr.location, _reg('ax'), _reg('al'));
+            },
+            cwde: function(instr, context) {
+                return Base.extend_sign(instr.location, _reg('eax'), _reg('ax'));
+            },
+            cdqe: function(instr) {
+                return Base.extend_sign(instr.location, _reg('rax'), _reg('eax'));
+            },
             div: function(instr) {
-                return _math_divide(instr.parsed, false);
+                return _math_divide(instr, false);
             },
             idiv: function(instr) {
-                return _math_divide(instr.parsed, true);
+                return _math_divide(instr, true);
             },
+            /*
             mul: function(instr) {
-                return _math_multiply(instr.parsed, false);
+                return _math_multiply(instr, false);
             },
             imul: function(instr) {
-                return _math_multiply(instr.parsed, true);
+                return _math_multiply(instr, true);
             },
             */
             push: function(instr, instructions) {
@@ -330,25 +442,38 @@ module.exports = (function() {
             pop: function(instr, instructions) {
                 return Base.stack_pop(instr.location, _ireg(instr, 0));
             },
-            lea: function(instr, context) {
+            lea: function(instr) {
                 var ops = [];
-                var dst = _op(instr, 0);
-                /*
-                var val = _op(instr, 1);
-
-                // compilers like to perform calculations using 'lea' instructions in the
-                // following form: [reg + reg*n] --> reg * (n+1)
-                var calc = val.token.match(/([re]?(?:[abcd]x|[ds]i)|r(?:1[0-5]|[8-9])[lwd]?)\s*\+\s*\1\s*\*(\d)/);
-
-                if (calc) {
-                    return Base.multiply(instr.location, dst.token, calc[1], parseInt(calc[2]) + 1 + '');
-                }
-                */
-                val = _memory_composed(instr.location, _op(instr, 1), ops);
-                ops.push(Base.assign(instr.location, _reg(dst.token), val));
+                var dst = _ireg(instr, 0);
+                var val = _multi_math(instr.location, _op(instr, 1), ops);
+                ops.push(Base.assign(instr.location, dst, val));
                 return Base.compose(ops);
             },
             mov: _standard_mov,
+            movd: _standard_mov,
+            movq: _standard_mov,
+            movss: _standard_mov,
+            /* movsd: See below. Conflict with string operator */
+            movabs: _standard_mov,
+            movsx: function(instr) {
+                return _extended_mov(instr, true);
+            },
+            movsxd: function(instr) {
+                return _extended_mov(instr, true);
+            },
+            movzx: function(instr) {
+                return _extended_mov(instr, false);
+            },
+            call: function(instr, instructions) {
+                var ops = [];
+                var dst = _op(instr, 0);
+                if (dst.mem_access) {
+                    dst = _memory_composed(instr.location, dst, ops);
+                } else {
+                    ops.push(Base.call(instr.location, _ireg(instr, 0) || _imm2(instr, 0)));
+                }
+                return Base.compose(ops);
+            },
             jmp: function(instr, instructions) {
                 var dst = _op(instr, 0);
 
@@ -362,7 +487,7 @@ module.exports = (function() {
                         return Base.call(dst.token);
                     } else if ( _is_local_var(dst.token, context) || dst.token.startsWith('0x')) {
                         // indirectly jumping through a local variable or to an explicit memory address
-                        return Base.jump(_ireg(instr, 0) || _imm(dst.token)); //_call_function(instr, context, instructions, true);
+                        return Base.jump(_ireg(instr, 0) || _imm(dst.token)); //_call_function(instr, instructions, true);
                     }
                 }
                 */
@@ -427,6 +552,9 @@ module.exports = (function() {
             },
             ret: function(instr) {
                 return Base.return(instr.location);
+            },
+            nop: function() {
+                return Base.nop();
             },
             invalid: function() {
                 return Base.nop();

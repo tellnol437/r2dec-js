@@ -23,14 +23,14 @@ module.exports = (function() {
 
     function find_jump(instr, instructions) {
         if (!Long.isLong(instr.operands[0].value)) {
-            return instr.operands[0].value;
+            return;
         }
         for (var i = 0; i < instructions.length; i++) {
             if (instructions[i].at(instr.operands[0].value)) {
                 return i;
             }
         }
-        return instr.operands[0].value;
+        return;
     }
 
     /**
@@ -59,8 +59,9 @@ module.exports = (function() {
             }
             func = architecture.instructions[instr.parsed.mnem];
             if (func) {
-                console.log(instr.simplified);
+                //console.log(instr.assembly);
                 ir = func(instr, instructions) || Base.unknown(instr.location, instr.assembly);
+                //console.log('    '  + ir.join('\n    '))
             } else {
                 ir = Base.unknown(instr.location, instr.assembly);
             }
@@ -78,8 +79,12 @@ module.exports = (function() {
             }
             if (IR.Jump.is(instructions[i])) {
                 var index = find_jump(instructions[i], instructions);
+                if (typeof index != 'undefined') {
+                    IR.Jump.set(instructions[i], index);
+                }
             }
         }
+        console.log('size', context.instructions.length);
     }
 
     function Context(data, architecture) {
@@ -89,11 +94,12 @@ module.exports = (function() {
     }
 
     Context.prototype.dump = function() {
-        console.log('[Context begin]');
-        for (var i = 0; i < this.instructions.length; i++) {
+        var size = this.instructions.length;
+        console.log('[Context begin:' + size + ']');
+        for (var i = 0; i < size; i++) {
             console.log('    ' + this.instructions[i]);
         }
-        console.log('[Context end]');
+        console.log('[Context end:' + size + ']');
     };
 
     return Context;

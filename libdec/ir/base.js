@@ -60,10 +60,50 @@ module.exports = (function() {
             Throw.IsNull(src, 'not.src');
             return [new IR.Not(location, [dst, src])];
         },
+        multiply: function(location, dst, src_a, src_b) {
+            Throw.IsNull(dst, 'multiply.dst');
+            Throw.IsNull(src_a, 'multiply.src_a');
+            Throw.IsNull(src_b, 'multiply.src_b');
+            return [new IR.Multiply(location, [dst, src_a, src_b])];
+        },
+        divide: function(location, dst, src_a, src_b) {
+            Throw.IsNull(dst, 'divide.dst');
+            Throw.IsNull(src_a, 'divide.src_a');
+            Throw.IsNull(src_b, 'divide.src_b');
+            return [new IR.Divide(location, [dst, src_a, src_b])];
+        },
+        module: function(location, dst, src_a, src_b) {
+            Throw.IsNull(dst, 'module.dst');
+            Throw.IsNull(src_a, 'module.src_a');
+            Throw.IsNull(src_b, 'module.src_b');
+            return [new IR.Module(location, [dst, src_a, src_b])];
+        },
+        shift_left: function(location, dst, src_a, shift) {
+            Throw.IsNull(dst, 'shift_left.dst');
+            Throw.IsNull(src_a, 'shift_left.src_a');
+            Throw.IsNull(shift, 'shift_left.shift');
+            return [new IR.ShiftLeft(location, [dst, src_a, shift])];
+        },
+        shift_right: function(location, dst, src_a, shift) {
+            Throw.IsNull(dst, 'shift_right.dst');
+            Throw.IsNull(src_a, 'shift_right.src_a');
+            Throw.IsNull(shift, 'shift_right.shift');
+            return [new IR.ShiftRight(location, [dst, src_a, shift])];
+        },
         assign: function(location, dst, src) {
             Throw.IsNull(dst, 'assign.dst');
             Throw.IsNull(src, 'assign.src');
             return [new IR.Assign(location, [dst, src])];
+        },
+        extend_sign: function(location, dst, src) {
+            Throw.IsNull(dst, 'extend_sign.dst');
+            Throw.IsNull(src, 'extend_sign.src');
+            return [new IR.ExtendSign(location, [dst, src])];
+        },
+        extend_zero: function(location, dst, src) {
+            Throw.IsNull(dst, 'extend_zero.dst');
+            Throw.IsNull(src, 'extend_zero.src');
+            return [new IR.ExtendZero(location, [dst, src])];
         },
         stack_pop: function(location, dst) {
             Throw.IsNull(dst, 'stack_pop.dst');
@@ -79,7 +119,7 @@ module.exports = (function() {
             Throw.IsNull(register, 'read_memory.register');
             Throw.IsNull(bits, 'read_memory.bits');
             if (signed) {
-                return [new IR.Read(location, bits, [register, pointer]), new IR.ExtendSign(null, [register])];
+                return [new IR.Read(location, bits, [register, pointer]), new IR.ExtendSign(null, [register, register])];
             }
             return [new IR.Read(location, bits, [register, pointer])];
         },
@@ -88,9 +128,13 @@ module.exports = (function() {
             Throw.IsNull(register, 'read_memory.register');
             Throw.IsNull(bits, 'read_memory.bits');
             if (signed) {
-                return [new IR.ExtendSign(location, [register]), new IR.Write(null, bits, [register, pointer])];
+                return [new IR.ExtendSign(location, [register, register]), new IR.Write(null, bits, [register, pointer])];
             }
             return [new IR.Write(location, bits, [register, pointer])];
+        },
+        call: function(location, address) {
+            Throw.IsNull(address, 'call.address');
+            return [new IR.Call(location, [address])];
         },
         jump: function(location, address) {
             Throw.IsNull(address, 'jump.address');

@@ -78,19 +78,19 @@ module.exports = (function() {
         Opcode.call(this, location, '^', operands);
     }
 
-    function LeftShift(location, operands) {
+    function ShiftLeft(location, operands) {
         Opcode.call(this, location, '<<', operands);
     }
 
-    function RightShift(location, operands) {
+    function ShiftRight(location, operands) {
         Opcode.call(this, location, '>>', operands);
     }
 
-    function LeftRotate(location, operands) {
+    function RotateLeft(location, operands) {
         Opcode.call(this, location, 'rotl', operands);
     }
 
-    function RightRotate(location, operands) {
+    function RotateRight(location, operands) {
         Opcode.call(this, location, 'rotr', operands);
     }
 
@@ -148,6 +148,10 @@ module.exports = (function() {
         Opcode.call(this, location, 'return', operands);
     }
 
+    function Call(location, operands) {
+        Opcode.call(this, location, 'call', operands);
+    }
+
     function Jump(location, condition, operands) {
         if (condition) {
             operands.push(condition);
@@ -157,6 +161,10 @@ module.exports = (function() {
 
     Jump.is = function(opcode) {
         return opcode && opcode.name ? opcode.name.indexOf('jump') >= 0 : false;
+    };
+
+    Jump.set = function(opcode, jumpto) {
+        opcode.operands[0].value = jumpto;
     };
 
     function Compare(location, operands) {
@@ -186,15 +194,15 @@ module.exports = (function() {
         Decrease: Decrease,
         Divide: Divide,
         Increase: Increase,
-        LeftRotate: LeftRotate,
-        LeftShift: LeftShift,
         Module: Module,
         Multiply: Multiply,
         Negate: Negate,
         Not: Not,
         Or: Or,
-        RightRotate: RightRotate,
-        RightShift: RightShift,
+        RotateLeft: RotateLeft,
+        RotateRight: RotateRight,
+        ShiftLeft: ShiftLeft,
+        ShiftRight: ShiftRight,
         Subtract: Subtract,
         Swap: Swap,
         Xor: Xor,
@@ -206,6 +214,7 @@ module.exports = (function() {
         StackPush: StackPush,
         /* logic */
         Compare: Compare,
+        Call: Call,
         Jump: Jump,
         Return: Return,
         /* signess */

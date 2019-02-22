@@ -353,11 +353,21 @@ module.exports = (function() {
         return Base.extend_sign(instr.location, dst, src);
     }
 
+    /**
+     * Handles SETcc (conditional set) instructions.
+     * @param {Object} p Parsed instruction structure
+     * @param {boolean} signed Signed operation or operands
+     * @param {string} condition Operation string literal
+     * @param {Object} context Context object
+     */
+    var _setcc_common = function(instr, condition) {
+        var dest = _ireg(instr, 0);
+        // destination, source_a, source_b, cond, src_true, src_false
+        return Base.conditional_assign(instr.location, dest, condition, condition.signed ? Long.ONE : Long.UONE, condition.signed ? Long.ZERO : Long.UZERO);
+    };
+
     return {
         instructions: {
-            //cld: function(instr) {
-            //    return Base.nop();
-            //},
             inc: function(instr) {
                 instr.parsed.operands[1].token = '1'; // dirty hack :(
                 return _math_common(instr, Base.add, true);
@@ -441,6 +451,37 @@ module.exports = (function() {
             },
             pop: function(instr, instructions) {
                 return Base.stack_pop(instr.location, _ireg(instr, 0));
+            },
+            /* Conditional set */
+            seta: function(instr) {
+                return _setcc_common(instr, Condition.GT_U);
+            },
+            setae: function(instr) {
+                return _setcc_common(instr, Condition.GE_U);
+            },
+            setb: function(instr) {
+                return _setcc_common(instr, Condition.LT_U);
+            },
+            setbe: function(instr) {
+                return _setcc_common(instr, Condition.LE_U);
+            },
+            setg: function(instr) {
+                return _setcc_common(instr, Condition.GT_S);
+            },
+            setge: function(instr) {
+                return _setcc_common(instr, Condition.GE_S);
+            },
+            setl: function(instr) {
+                return _setcc_common(instr, Condition.LT_S);
+            },
+            setle: function(instr) {
+                return _setcc_common(instr, Condition.LE_S);
+            },
+            sete: function(instr) {
+                return _setcc_common(instr, Condition.EQ);
+            },
+            setne: function(instr) {
+                return _setcc_common(instr, Condition.NE);
             },
             lea: function(instr) {
                 var ops = [];

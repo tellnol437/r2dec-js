@@ -25,9 +25,10 @@ module.exports = (function() {
         if (!Long.isLong(instr.operands[0].value)) {
             return;
         }
+        var pos = instructions.indexOf(instr);
         for (var i = 0; i < instructions.length; i++) {
             if (instructions[i].at(instr.operands[0].value)) {
-                return i;
+                return i - pos;
             }
         }
         return;

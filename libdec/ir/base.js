@@ -16,6 +16,7 @@
  */
 
 module.exports = (function() {
+    const Operand = require('libdec/ir/operand');
     const IR = require('libdec/ir/ir');
     const Throw = require('libdec/throw');
 
@@ -150,6 +151,18 @@ module.exports = (function() {
             Throw.IsNull(src_a, 'add.src_a');
             Throw.IsNull(src_b, 'add.src_b');
             return [new IR.Compare(location, [dst, src_a, src_b])];
+        },
+        conditional_assign: function(location, dst, condition, src_true, src_false) {
+            Throw.IsNull(dst, 'conditional_assign.dst');
+            Throw.IsNull(condition, 'conditional_assign.condition');
+            Throw.IsNull(src_true, 'conditional_assign.src_true');
+            Throw.IsNull(src_false, 'conditional_assign.src_false');
+            return [
+                new IR.Jump(location, condition, [3]),
+                new IR.Assign(null, [dst, src_true]),
+                new IR.Jump(null, null, [2]),
+                new IR.Assign(null, [dst, src_false])
+            ];
         },
         return: function(location) {
             return [new IR.Return(location, Array.prototype.slice.call(arguments, 1))];

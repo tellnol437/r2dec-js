@@ -51,7 +51,7 @@ var r2cmdj = function() {
     return output ? JSON.parse(output) : undefined;
 };
 
-function Function(afij, afbj) {
+function Routine(afij, afbj) {
     this.name = afij.name;
     this.calltype = afij.calltype;
 
@@ -75,7 +75,7 @@ function Function(afij, afbj) {
     // TODO: return_type
 }
 
-Function.prototype.getBlock = function(address) {
+Routine.prototype.getBlock = function(address) {
     for (var i = 0; i < this.basic_blocks.length; i++) {
         var block = this.basic_blocks[i];
 
@@ -87,7 +87,7 @@ Function.prototype.getBlock = function(address) {
     return undefined;
 };
 
-Function.prototype.cfg = function() {
+Routine.prototype.cfg = function() {
     var nodes = []; // basic blocks
     var edges = []; // jumping, branching or falling into another basic block
 
@@ -241,14 +241,13 @@ function r2dec_main(args) {
 
         var iIj = r2cmdj('iIj');
 
-        if (Decoder.has(iIj.arch))
-        {
+        if (Decoder.has(iIj.arch)) {
             var afij = r2cmdj('afij');
             var afbj = r2cmdj('afbj');
 
-            if (afij && afbj) {
+            if (afij && afij.length > 0 && afbj) {
                 var decoder = new Decoder(iIj);
-                var func = new Function(afij.pop(), afbj);
+                var func = new Routine(afij.pop(), afbj);
 
                 // transform assembly instructions into internal representation
                 // this is a prerequisit to ssa-based analysis and optimizations

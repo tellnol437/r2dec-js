@@ -266,7 +266,7 @@ function r2dec_main(args) {
                 var ssa = new SSA(func);
                 var defs = ssa.rename_variables();
 
-                // ControlFlow.run(func);
+                ControlFlow.run(func);
 
                 console.log(new CodeGen(func).emit());
             } else {

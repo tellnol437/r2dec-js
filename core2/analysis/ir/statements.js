@@ -404,6 +404,10 @@ module.exports = (function() {
         this.statements.push(stmt);
     };
 
+    Container.prototype.pop_stmt = function() {
+        return this.statements.pop();
+    };
+
     /**
      * Generate a deep copy of this.
      * @returns {!Container}

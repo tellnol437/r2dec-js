@@ -40,17 +40,17 @@ module.exports = (function() {
             this._emit_token(')');
             this._emit_whitespace('\n');
 
-            // var block = func.entry_block;
-            // while (block) {
-            //     this._emit_scope(block, 0);
-            //
-            //     block = this.func.blocks[block.container.next];
-            // }
-            //
+            var block = func.entry_block;
+            while (block) {
+                console.log(block)
+                this._emit_scope(block, 0);
+                block = this.func.basic_blocks[block.next];
+            }
+
             // TODO: temp
-            func.basic_blocks.forEach(function(bb) {
-                this._emit_scope(bb, 0);
-            }, this);
+            //func.basic_blocks.forEach(function(bb) {
+            //    this._emit_scope(bb, 0);
+            //}, this);
 
             return this.text.join('');
         };
@@ -129,16 +129,14 @@ module.exports = (function() {
             }
 
             // ... TODO: lazy implementation; remove this
-            this.text.push(expr.toString());
+            this.text.push(expr ? expr.toString() : "???");
         };
 
         this._emit_statement = function(stmt, depth) {
             var p = this._pad(depth);
             this._emit_whitespace(p);
-
             // TODO: for debug purposes; remove this
             this._emit_token('0x' + stmt.addr.toString(16) + ' : ');
-
             if (stmt instanceof Stmt.Branch) {
                 // TODO: a Branch is meant to be replaced by an 'If'; it is here only for dev purpose
                 this._emit_token(stmt);
@@ -150,9 +148,7 @@ module.exports = (function() {
                 this._emit_token(';');
             } else if (stmt instanceof Stmt.DoWhile) {
                 this._emit_token('do');
-
                 this._emit_scope(stmt.body, depth);
-
                 this._emit_token('while');
                 this._emit_whitespace(' ');
                 this._emit_token('(');

@@ -1,5 +1,6 @@
+.directory
+/js/themes/*.json
 /nbproject/
 /node_modules/
-p/core_pdd.so
-p/r2dec-test
-/themes/*.json
+core_pdd.so
+r2dec-test

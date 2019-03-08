@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2018 deroad
+ * Copyright (C) 2019 deroad
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,33 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-(function() {
-    var __colors = [
-        'black',
-        'red',
-        'green',
-        'yellow',
-        'blue',
-        'magenta',
-        'cyan',
-        'white',
-        'gray',
-    ];
-    var Color = function(name) {
-        if (__colors.indexOf(name) < 0) {
-            throw new Error('Invalid name: ' + name);
-        }
-        var fn = function(x) {
-            return x;
-        };
-        return fn;
-    };
-    module.exports = Color;
-    module.exports.make = function(theme) {
-        var g = {};
-        for (var key in theme) {
-            g[key] = Color(theme[key]);
-        }
-        return g;
-    };
+module.exports = (function() {
+	return {};
 })();

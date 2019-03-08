@@ -153,19 +153,17 @@ static void usage(void) {
 	r_cons_printf ("Usage: pdd [args] - core plugin for r2dec\n");
 	r_cons_printf (" pdd           - decompile current function\n");
 	r_cons_printf (" pdd?          - show this help\n");
-	r_cons_printf (" pdd*          - the decompiled code is returned to r2 as comment (via CCu)\n");
+	r_cons_printf (" pdd*          - the decompiled code is returned as an r2 command (CCu base64:<b64>)\n");
+	r_cons_printf (" pddc          - the decompiled code is returned to r2 as comment (via CCu)\n");
 	r_cons_printf (" pdda          - decompile current function with side assembly\n");
-	r_cons_printf (" pddb          - decompile current function but shows only scopes\n");
 	r_cons_printf (" pddu          - install/upgrade r2dec via r2pm\n");
 	r_cons_printf (" pdds <branch> - switches r2dec branch\n");
 	r_cons_printf (" pddi          - generates the issue data\n");
 	r_cons_printf ("Evaluable Variables:\n");
-	r_cons_printf (" r2dec.casts   - if false, hides all casts in the pseudo code.\n");
-	r_cons_printf (" r2dec.asm     - if true, shows pseudo next to the assembly.\n");
-	r_cons_printf (" r2dec.blocks  - if true, shows only scopes blocks.\n");
-	r_cons_printf (" r2dec.xrefs   - if true, shows all xrefs in the pseudo code.\n");
-	r_cons_printf (" r2dec.paddr   - if true, all xrefs uses physical addresses compare.\n");
-	r_cons_printf (" r2dec.theme   - defines the color theme to be used on r2dec.\n");
+	r_cons_printf (" r2dec.debug          - do not catch exceptions; useful for r2dec development.\n");
+	r_cons_printf (" r2dec.theme          - defines the color theme to be used on r2dec.\n");
+	r_cons_printf (" r2dec.view.assembly  - shows the original assembly code side to side with the decompiled code.\n");
+	r_cons_printf (" r2dec.view.casts     - shows all casts in the decompiled code.\n");
 	r_cons_printf ("Environment\n");
 	r_cons_printf (" R2DEC_HOME  defaults to the root directory of the r2dec repo\n");
 
@@ -261,12 +259,11 @@ int r_cmd_pdd_init(void *user, const char *cmd) {
 	RCore *core = (RCore *) rcmd->data;
 	RConfig *cfg = core->config;
 	r_config_lock (cfg, false);
-	SETPREF("r2dec.casts", "false", "if false, hides all casts in the pseudo code.");
-	SETPREF("r2dec.asm", "false", "if true, shows pseudo next to the assembly.");
-	SETPREF("r2dec.blocks", "false", "if true, shows only scopes blocks.");
-	SETPREF("r2dec.xrefs", "false", "if true, shows all xrefs in the pseudo code.");
-	SETPREF("r2dec.paddr", "false", "if true, all xrefs uses physical addresses compare.");
-	SETPREF("r2dec.theme", "default", "defines the color theme to be used on r2dec.");
+	SETPREF("r2dec.debug", "false", "do not catch exceptions; useful for r2dec development.");
+	SETPREF("r2dec.view.assembly", "false", "shows the original assembly code side to side with the decompiled code.");
+	SETPREF("r2dec.view.casts", "false", "shows all casts in the decompiled code.");
+	SETPREF("r2dec.theme", "false", "shows all casts in the decompiled code.");
+
 	r_config_lock (cfg, true);
 
 	// autocomplete here..

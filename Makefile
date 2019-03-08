@@ -8,7 +8,6 @@ PLUGDIR=$(shell r2 -H R2_USER_PLUGINS)
 
 all:
 	$(CC) $(CFLAGS) $(LDFLAGS) -shared -fPIC duktape/duktape.c duktape/duk_console.c core_pdd.c -o core_pdd.$(LIBEXT)
-	$(MAKE) install
 
 install:
 	mkdir -p $(PLUGDIR)

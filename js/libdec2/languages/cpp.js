@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017-2018 deroad
+ * Copyright (C) 2019 deroad
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module.exports = {
-    core: require('libdec/core'),
-    archs: require('libdec/archs'),
-    context: require('libdec/context'),
-    supported: function() {
-        console.log('Supported architectures:');
-        console.log('    ' + Object.keys(this.archs).join(', '));
-    }
-};
+module.exports = (function() {
+	return {};
+})();

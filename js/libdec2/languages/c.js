@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2018 deroad
+ * Copyright (C) 2019 deroad
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module.exports = function(data) {
-    this.data = data;
-    this.print = function() {
-        var t = Global.printer.theme;
-        for (var i = 0; i < this.data.length; i++) {
-            console.log(Global.context.identfy() + t.macro(this.data[i]));
-        }
-    };
-};
+module.exports = (function() {
+	return {};
+})();

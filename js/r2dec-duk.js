@@ -25,13 +25,19 @@
  */
 
 const Options = require('libdec2/options');
+const Logger = require('libdec2/options');
 
 /**
  * r2dec main function.
  * @param  {Array} args - r2dec arguments to be used to configure the output.
  */
 function r2dec_main(args) {
-    if (Options.parse(args)) {
+	try {
+		if (!Options.parse(args)) {
+			return; // if something was wrong, just stop
+		}
 
-    }
+	} catch (e) {
+		Options.exception(e);
+	}
 }

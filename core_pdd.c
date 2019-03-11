@@ -137,12 +137,12 @@ static void duk_r2dec(RCore *core, const char *input) {
 	duk_console_init (ctx, 0);
 //	Long_init (ctx);
 	duk_r2_init (ctx);
-	duk_eval_file (ctx, "require.js");
-	duk_eval_file (ctx, "r2dec-duk.js");
+	duk_eval_file (ctx, "js/require.js");
+	duk_eval_file (ctx, "js/r2dec-duk.js");
 	if (*input) {
-		snprintf (args, sizeof(args), "if(typeof r2dec_main == 'function'){r2dec_main(\"%s\".split(/\\s+/));}else{console.log('Fatal error. Cannot use R2_HOME_DATADIR.');}", input);
+		snprintf (args, sizeof(args), "try {if(typeof r2dec_main == 'function'){r2dec_main(\"%s\".split(/\\s+/));}else{console.log('Fatal error. Cannot use R2_HOME_DATADIR.');}}catch(exv){console.log(exv);}", input);
 	} else {
-		snprintf (args, sizeof(args), "if(typeof r2dec_main == 'function'){r2dec_main([]);}else{console.log('Fatal error. Cannot use R2_HOME_DATADIR.');}");
+		snprintf (args, sizeof(args), "try {if(typeof r2dec_main == 'function'){r2dec_main([]);}else{console.log('Fatal error. Cannot use R2_HOME_DATADIR.');}}catch(exv){console.log(exv);}");
 	}
 	duk_eval_string_noresult (ctx, args);
 	duk_destroy_heap (ctx);
@@ -262,7 +262,7 @@ int r_cmd_pdd_init(void *user, const char *cmd) {
 	SETPREF("r2dec.debug", "false", "do not catch exceptions; useful for r2dec development.");
 	SETPREF("r2dec.view.assembly", "false", "shows the original assembly code side to side with the decompiled code.");
 	SETPREF("r2dec.view.casts", "false", "shows all casts in the decompiled code.");
-	SETPREF("r2dec.theme", "false", "shows all casts in the decompiled code.");
+	SETPREF("r2dec.theme", "default", "shows all casts in the decompiled code.");
 
 	r_config_lock (cfg, true);
 

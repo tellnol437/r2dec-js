@@ -15,12 +15,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module.exports = function(message) {
-    if (typeof message == 'string') {
-        message = "[!] " + message;
-        if (this.printer.theme.comment) {
-            message = this.printer.theme.comment(message);
-        }
-        console.log(message);
-    }
-};
+module.exports = (function() {
+	return {
+		error: function(message) {
+			if (typeof message == 'string') {
+				message = "[r2dec] " + message;
+				if (this.printer.theme.comment) {
+					message = this.printer.theme.comment(message);
+				}
+				console.log(message);
+			}
+		},
+		warning: function(message) {
+			if (typeof message == 'string') {
+				message = "[r2dec][!] " + message;
+				if (this.printer.theme.comment) {
+					message = this.printer.theme.comment(message);
+				}
+				console.log(message);
+			}
+		},
+		debug: function(message) {
+			if (Options.debug && typeof message == 'string') {
+				message = "[r2dec][#] " + message;
+				if (this.printer.theme.comment) {
+					message = this.printer.theme.comment(message);
+				}
+				console.log(message);
+			}
+		}
+	};
+})();

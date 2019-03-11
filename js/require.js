@@ -35,7 +35,7 @@ var require = function(x) {
         var module = {
             exports: null
         };
-        var src = ___internal_require(x);
+        var src = ___internal_require('js/' + x);
         eval(src);
         arguments.callee.src[x] = src.split('\n');
         arguments.callee.loaded[x] = module.exports;

@@ -43,6 +43,7 @@ module.exports = (function() {
 			"--help": {
 				description: "this help message",
 				set: function(self) {
+					self.usage();
 					self.help = true;
 				}
 			},
@@ -104,15 +105,21 @@ module.exports = (function() {
 		this.parse = function(argv) {
 			for (var i = 0; i < argv.length; i++) {
 				if (!this.args[argv[i]]) {
+					console.log("Unknown option '" + argv[i] + "'.")
 					this.usage();
 					return false;
 				}
 				this.args[argv[i]].set(this);
 			}
-			return true;
+			return !this.help;
 		};
 		this.usage = function() {
+			var psize = 4;
 			console.log("r2dec [options]");
+			for (var key in this.args) {
+				psize = Math.max(psize, key.length);
+			}
+			var padding = " ".repeat(psize);
 			for (var key in this.args) {
 				var cmd = key + padding.substr(key.length, padding.length);
 				console.log("       " + cmd + " | " + this.args[key].description);

@@ -151,6 +151,7 @@ module.exports = (function() {
 			this.sanitize.set(false);
 			if (this.debug) {
 				console.log('Exception:', exception.stack);
+				this.dump();
 			} else {
 				console.log(
 					'\n\nr2dec has crashed (info: ' + this.file + ' @ ' + this.offset + ').\n' +

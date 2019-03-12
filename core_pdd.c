@@ -212,10 +212,6 @@ static void _cmd_pdd(RCore *core, const char *input) {
 		// --assembly
 		duk_r2dec (core, "--assembly");
 		break;
-	case 'b':
-		// --blocks
-		duk_r2dec (core, "--blocks");
-		break;
 	case '*':
 		// --as-comment
 		duk_r2dec (core, "--as-comment");
@@ -271,21 +267,19 @@ int r_cmd_pdd_init(void *user, const char *cmd) {
 	r_core_autocomplete_add (core->autocomplete, "pdd?", R_CORE_AUTOCMPLT_DFLT, true);
 	r_core_autocomplete_add (core->autocomplete, "pdd*", R_CORE_AUTOCMPLT_DFLT, true);
 	r_core_autocomplete_add (core->autocomplete, "pdda", R_CORE_AUTOCMPLT_DFLT, true);
-	r_core_autocomplete_add (core->autocomplete, "pddb", R_CORE_AUTOCMPLT_DFLT, true);
 	r_core_autocomplete_add (core->autocomplete, "pddi", R_CORE_AUTOCMPLT_DFLT, true);
 	r_core_autocomplete_add (core->autocomplete, "pdds", R_CORE_AUTOCMPLT_DFLT, true);
 	r_core_autocomplete_add (core->autocomplete, "pddu", R_CORE_AUTOCMPLT_DFLT, true);
-	r_core_autocomplete_add (pdd, "--as-comment", R_CORE_AUTOCMPLT_OPTN, true);
-	r_core_autocomplete_add (pdd, "--as-opcode", R_CORE_AUTOCMPLT_OPTN, true);
-	r_core_autocomplete_add (pdd, "--assembly", R_CORE_AUTOCMPLT_OPTN, true);
-	r_core_autocomplete_add (pdd, "--blocks", R_CORE_AUTOCMPLT_OPTN, true);
-	r_core_autocomplete_add (pdd, "--casts", R_CORE_AUTOCMPLT_OPTN, true);
-	r_core_autocomplete_add (pdd, "--colors", R_CORE_AUTOCMPLT_OPTN, true);
+	r_core_autocomplete_add (pdd, "--help", R_CORE_AUTOCMPLT_OPTN, true);
 	r_core_autocomplete_add (pdd, "--debug", R_CORE_AUTOCMPLT_OPTN, true);
-	r_core_autocomplete_add (pdd, "--html", R_CORE_AUTOCMPLT_OPTN, true);
 	r_core_autocomplete_add (pdd, "--issue", R_CORE_AUTOCMPLT_OPTN, true);
-	r_core_autocomplete_add (pdd, "--paddr", R_CORE_AUTOCMPLT_OPTN, true);
-	r_core_autocomplete_add (pdd, "--xrefs", R_CORE_AUTOCMPLT_OPTN, true);
+	r_core_autocomplete_add (pdd, "--assembly", R_CORE_AUTOCMPLT_OPTN, true);
+	r_core_autocomplete_add (pdd, "--casts", R_CORE_AUTOCMPLT_OPTN, true);
+	r_core_autocomplete_add (pdd, "--as-comment", R_CORE_AUTOCMPLT_OPTN, true);
+	r_core_autocomplete_add (pdd, "--as-project", R_CORE_AUTOCMPLT_OPTN, true);
+	r_core_autocomplete_add (pdd, "--colors", R_CORE_AUTOCMPLT_OPTN, true);
+	r_core_autocomplete_add (pdd, "--html", R_CORE_AUTOCMPLT_OPTN, true);
+	r_core_autocomplete_add (pdd, "--lang-c", R_CORE_AUTOCMPLT_OPTN, true);
 	return true;
 }
 

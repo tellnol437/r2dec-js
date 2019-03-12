@@ -111,11 +111,11 @@ static void duk_r2dec(const char *input) {
 	duk_console_init (ctx, 0);
 //	Long_init (ctx);
 	duk_r2_init (ctx);
-	if (duk_eval_file (ctx, "require.js") && duk_eval_file (ctx, "r2dec-test.js")) {		
+	if (duk_eval_file (ctx, "js/require.js") && duk_eval_file (ctx, "js/r2dec-test.js")) {		
 		if (*input) {
-			snprintf (args, sizeof(args), "r2dec_main(\"%s\")", input);
+			snprintf (args, sizeof(args), "try {r2dec_main(\"%s\")}catch(exv){console.log(exv);}", input);
 		} else {
-			snprintf (args, sizeof(args), "r2dec_main()");
+			snprintf (args, sizeof(args), "try {r2dec_main()}catch(exv){console.log(exv);}");
 		}
 		duk_eval_string_noresult (ctx, args);
 	}

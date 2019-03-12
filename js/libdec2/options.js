@@ -39,6 +39,7 @@ module.exports = (function() {
 		this.file = r2.string('i~^file[1:0]');
 		this.offset = r2.string('s');
 		/* arguments accepted by r2dec */
+		this.sanitize = new r2.sanitize();
 		this.args = {
 			"--help": {
 				description: "this help message",
@@ -105,7 +106,7 @@ module.exports = (function() {
 		this.parse = function(argv) {
 			for (var i = 0; i < argv.length; i++) {
 				if (!this.args[argv[i]]) {
-					console.log("Unknown option '" + argv[i] + "'.")
+					console.log("Unknown option '" + argv[i] + "'.");
 					this.usage();
 					return false;
 				}
@@ -113,18 +114,39 @@ module.exports = (function() {
 			}
 			return !this.help;
 		};
+
+		this.dump = function() {
+			console.log("[Options");
+			console.log('    debug:          ' + this.debug);
+			console.log('    help:           ' + this.help);
+			console.log('    issue:          ' + this.issue);
+			console.log('    theme:          ' + this.theme);
+			console.log('    view.assembly:  ' + this.view.assembly);
+			console.log('    view.casts:     ' + this.view.casts);
+			console.log('    output.comment: ' + this.output.comment);
+			console.log('    output.project: ' + this.output.project);
+			console.log('    output.colors:  ' + this.output.colors);
+			console.log('    output.html:    ' + this.output.html);
+			//console.log('    analysis:       ' + this.analysis);
+			console.log('    language:       ' + this.language);
+			console.log('    file:           ' + this.file);
+			console.log('    offset:         ' + this.offset);
+			console.log("]");
+		};
+
 		this.usage = function() {
-			var psize = 4;
+			var key, psize = 4;
 			console.log("r2dec [options]");
-			for (var key in this.args) {
+			for (key in this.args) {
 				psize = Math.max(psize, key.length);
 			}
 			var padding = " ".repeat(psize);
-			for (var key in this.args) {
+			for (key in this.args) {
 				var cmd = key + padding.substr(key.length, padding.length);
 				console.log("       " + cmd + " | " + this.args[key].description);
 			}
 		};
+
 		this.exception = function(exception) {
 			this.sanitize.set(false);
 			if (this.debug) {

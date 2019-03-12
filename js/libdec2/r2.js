@@ -42,7 +42,7 @@ module.exports = (function() {
 	function r2bigint(value, def) {
 		var x = r2str(value);
 		if (x != '') {
-			radix = 10;
+			var radix = 10;
 			if (x.startsWith('0x')) {
 				radix = 16;
 				x = x.substr(2);
@@ -76,7 +76,7 @@ module.exports = (function() {
 			r2dec_sanitize(enable, 'asm.ucase', this.ucase, 'false');
 			r2dec_sanitize(enable, 'asm.pseudo', this.pseudo, 'false');
 			r2dec_sanitize(enable, 'asm.capitalize', this.capitalize, 'false');
-		}
+		};
 	}
 
 	return {

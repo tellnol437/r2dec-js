@@ -1,7 +1,7 @@
 module.exports = (function() {
+    const BigInt = require('libdec2/libs/bigint');
     var json_parse = function(options) {
         "use strict";
-        const BigInt = require('libdec2/libs/bigint');
         // This is a function that can parse a JSON text, producing a JavaScript
         // data structure. It is a simple, recursive descent parser. It does not use
         // eval or regular expressions, so it can be used as a model for implementing

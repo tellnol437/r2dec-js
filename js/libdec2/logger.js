@@ -16,32 +16,22 @@
  */
 
 module.exports = (function() {
+	const Options = require('libdec2/options');
+
 	return {
 		error: function(message) {
 			if (typeof message == 'string') {
-				message = "[r2dec] " + message;
-				if (this.printer.theme.comment) {
-					message = this.printer.theme.comment(message);
-				}
-				console.log(message);
+				console.log("[!] " + message);
 			}
 		},
-		warning: function(message) {
+		notice: function(message) {
 			if (typeof message == 'string') {
-				message = "[r2dec][!] " + message;
-				if (this.printer.theme.comment) {
-					message = this.printer.theme.comment(message);
-				}
-				console.log(message);
+				console.log("[+] " + message);
 			}
 		},
 		debug: function(message) {
 			if (Options.debug && typeof message == 'string') {
-				message = "[r2dec][#] " + message;
-				if (this.printer.theme.comment) {
-					message = this.printer.theme.comment(message);
-				}
-				console.log(message);
+				console.log("[#] " + message);
 			}
 		}
 	};

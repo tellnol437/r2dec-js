@@ -25,7 +25,7 @@
  */
 
 const Options = require('libdec2/options');
-const Logger = require('libdec2/options');
+//const Logger = require('libdec2/options');
 
 /**
  * r2dec main function.
@@ -36,7 +36,7 @@ function r2dec_main(args) {
 		if (!Options.parse(args)) {
 			return; // if something was wrong, just stop
 		}
-
+		Options.dump();
 	} catch (e) {
 		Options.exception(e);
 	}

@@ -24,19 +24,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-const Options = require('libdec2/options');
-//const Logger = require('libdec2/options');
-
 /**
  * r2dec main function.
  * @param  {Array} args - r2dec arguments to be used to configure the output.
  */
 function r2dec_main(args) {
+	const Options = require('libdec2/options');
+	const Logger = require('libdec2/logger');
+	const DecData = require('libdec2/analysis/data');
 	try {
 		if (!Options.parse(args)) {
 			return; // if something was wrong, just stop
 		}
-		Options.dump();
+		var data = DecData.create();
+		if (data) {
+			data.dump();
+		} else {
+			Logger.error("Error: no data available.\nPlease analyze the function/binary first.");
+		}
 	} catch (e) {
 		Options.exception(e);
 	}

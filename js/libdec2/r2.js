@@ -16,7 +16,7 @@
  */
 
 module.exports = (function() {
-	const BigInt = require('libdec2/libs/bigint');
+	const bigInt = require('libdec2/libs/bigint');
 	const _JSON = require('libdec2/libs/json64');
 
 	function r2str(value, multiline) {
@@ -48,7 +48,7 @@ module.exports = (function() {
 				x = x.substr(2);
 			}
 			try {
-				return new BigInt(x, radix);
+				return new bigInt(x, radix);
 			} catch (e) {}
 		}
 		return def;

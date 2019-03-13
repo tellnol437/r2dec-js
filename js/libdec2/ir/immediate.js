@@ -17,16 +17,16 @@
 
 module.exports = (function() {
 	const Throw = require('libdec2/throw');
-	const BigInt = require('libdec2/libs/bigint');
+	const bigInt = require('libdec2/libs/bigint');
 
 	/**
 	 * Immediate value.
-	 * @param {!BigInt} value Immediate value
+	 * @param {!bigInt} value Immediate value
 	 * @constructor
 	 */
 	function Immediate(value) {
-		Throw.isNotObject(value, BigInt, Immediate);
-		/** @type {!BigInt} */
+		Throw.isNotObject(value, bigInt, Immediate);
+		/** @type {!bigInt} */
 		this.value = value;
 	}
 

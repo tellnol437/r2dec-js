@@ -1,5 +1,5 @@
 module.exports = (function() {
-    const BigInt = require('libdec2/libs/bigint');
+    const bigInt = require('libdec2/libs/bigint');
     var json_parse = function(options) {
         "use strict";
         // This is a function that can parse a JSON text, producing a JavaScript
@@ -87,7 +87,7 @@ module.exports = (function() {
                 } else {
                     if (string.indexOf('.') < 0) {
                         try {
-                            return new BigInt(string, 10);
+                            return new bigInt(string, 10);
                         } catch (e) {
                             console.log(e.stack);
                             return string;

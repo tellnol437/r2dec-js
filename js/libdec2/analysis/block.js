@@ -17,7 +17,7 @@
 
 module.exports = (function() {
 	const Throw = require('libdec2/throw');
-	const BigInt = require('libdec2/libs/bigint');
+	const bigInt = require('libdec2/libs/bigint');
 
 	/**
 	 * Returns true only if the object is not null
@@ -30,18 +30,25 @@ module.exports = (function() {
 
 	/**
 	 * Block contains microcode
-	 * @param {!BigInt}     location Location of the block
+	 * @param {!bigInt}     location Location of the block
 	 */
-	function Block(location) {
-		Throw.isNotObject(location, BigInt, Block);
+	function Block(location, opcodes) {
+		Throw.isNotObject(location, bigInt, Block);
+		Throw.isNotObject(opcodes, Array, Block);
 		this.location = location;
 		this.jump = null;
 		this.fail = null;
-		this.opcodes = [];
+		this.opcodes = opcodes;
 	}
 
-	Block.prototype.jump = function(opcodes) {
-		Throw.isNotObject(location, BigInt, Block);
+	Block.prototype.setJump = function(jump) {
+		Throw.isNotObject(jump, [bigInt, Block], Block);
+		this.jump = jump;
+	};
+
+	Block.prototype.setFail = function(fail) {
+		Throw.isNotObject(fail, [bigInt, Block], Block);
+		this.fail = fail;
 	};
 
 	Block.prototype.add = function(opcodes) {

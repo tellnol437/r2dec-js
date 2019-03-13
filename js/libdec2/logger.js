@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2018 deroad
+ * Copyright (C) 2018-2019 deroad
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,17 +21,17 @@ module.exports = (function() {
 	return {
 		error: function(message) {
 			if (typeof message == 'string') {
-				console.log("[!] " + message);
+				console.log("[!] " + message.replace(/\n/g, '\n[!] '));
 			}
 		},
 		notice: function(message) {
 			if (typeof message == 'string') {
-				console.log("[+] " + message);
+				console.log("[+] " + message.replace(/\n/g, '\n[+] '));
 			}
 		},
 		debug: function(message) {
 			if (Options.debug && typeof message == 'string') {
-				console.log("[#] " + message);
+				console.log("[#] " + message.replace(/\n/g, '\n[#] '));
 			}
 		}
 	};

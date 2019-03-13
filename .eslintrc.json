@@ -35,6 +35,7 @@
         "console": true,
         "r2cmd": true,
         "___internal_load": true,
-        "___internal_require": true
+        "___internal_require": true,
+        "BigInt": true
     }
 }

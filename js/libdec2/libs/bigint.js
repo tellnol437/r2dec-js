@@ -73,7 +73,7 @@ module.exports = (function(undefined) {
     function trim(v) {
         var i = v.length;
         while (v[--i] === 0) {
-            /* find end. */
+            /* do nothing */
         }
         v.length = i + 1;
     }
@@ -1034,7 +1034,7 @@ module.exports = (function(undefined) {
             if (n.lesser(a[i])) {
                 continue;
             }
-            x = BigInt(a[i]).modPow(b, n);
+            x = bigInt(a[i]).modPow(b, n);
             if (x.isUnit() || x.equals(nPrev)) {
                 continue;
             }
@@ -1066,7 +1066,7 @@ module.exports = (function(undefined) {
         var logN = Math.log(2) * bits.toJSNumber();
         var t = Math.ceil((strict === true) ? (2 * Math.pow(logN, 2)) : logN);
         for (var a = [], i = 0; i < t; i++) {
-            a.push(BigInt(i + 2));
+            a.push(bigInt(i + 2));
         }
         return millerRabinTest(n, a);
     };
@@ -1080,15 +1080,15 @@ module.exports = (function(undefined) {
         var n = this.abs();
         var t = iterations === undefined ? 5 : iterations;
         for (var a = [], i = 0; i < t; i++) {
-            a.push(BigInt.randBetween(2, n.minus(2)));
+            a.push(bigInt.randBetween(2, n.minus(2)));
         }
         return millerRabinTest(n, a);
     };
     NativeBigInt.prototype.isProbablePrime = SmallInteger.prototype.isProbablePrime = BigInteger.prototype.isProbablePrime;
 
     BigInteger.prototype.modInv = function(n) {
-        var t = BigInt.zero,
-            newT = BigInt.one,
+        var t = bigInt.zero,
+            newT = bigInt.one,
             r = parseValue(n),
             newR = this.abs(),
             q, lastT, lastR;
@@ -1233,9 +1233,9 @@ module.exports = (function(undefined) {
             yRem = yDivMod[0];
             result.push(fn(xDigit, yDigit));
         }
-        var sum = fn(xSign ? 1 : 0, ySign ? 1 : 0) !== 0 ? BigInt(-1) : BigInt(0);
+        var sum = fn(xSign ? 1 : 0, ySign ? 1 : 0) !== 0 ? bigInt(-1) : bigInt(0);
         for (var i = result.length - 1; i >= 0; i -= 1) {
-            sum = sum.multiply(highestPower2).add(BigInt(result[i]));
+            sum = sum.multiply(highestPower2).add(bigInt(result[i]));
         }
         return sum;
     }
@@ -1274,7 +1274,6 @@ module.exports = (function(undefined) {
         // BigInteger: return Min(lowestOneBit(n), 1 << 14) [BASE=1e7]
         var v = n.value,
             x = typeof v === "number" ? v | LOBMASK_I :
-            v instanceof BigInt ? v | BigInt(LOBMASK_I) :
             v[0] + v[1] * BASE | LOBMASK_BI;
         return x & -x;
     }
@@ -1294,20 +1293,20 @@ module.exports = (function(undefined) {
             };
         }
         return {
-            p: BigInt(1),
+            p: bigInt(1),
             e: 0
         };
     }
 
     BigInteger.prototype.bitLength = function() {
         var n = this;
-        if (n.compareTo(BigInt(0)) < 0) {
-            n = n.negate().subtract(BigInt(1));
+        if (n.compareTo(bigInt(0)) < 0) {
+            n = n.negate().subtract(bigInt(1));
         }
-        if (n.compareTo(BigInt(0)) === 0) {
-            return BigInt(0);
+        if (n.compareTo(bigInt(0)) === 0) {
+            return bigInt(0);
         }
-        return BigInt(integerLogarithm(n, BigInt(2)).e).add(BigInt(1));
+        return bigInt(integerLogarithm(n, bigInt(2)).e).add(bigInt(1));
     };
     NativeBigInt.prototype.bitLength = SmallInteger.prototype.bitLength = BigInteger.prototype.bitLength;
 
@@ -1457,7 +1456,7 @@ module.exports = (function(undefined) {
     }
 
     function toBase(n, base) {
-        base = BigInt(base);
+        base = bigInt(base);
         if (base.isZero()) {
             if (n.isZero()) {
                 return {
@@ -1679,9 +1678,6 @@ module.exports = (function(undefined) {
         if (typeof v === "string") {
             return parseStringValue(v);
         }
-        if (v instanceof BigInt) {
-            return new NativeBigInt(v);
-        }
         return v;
     }
     // Pre-define numbers in range [-999,999]
@@ -1708,6 +1704,7 @@ module.exports = (function(undefined) {
         return parseBaseFromArray(digits.map(parseValue), parseValue(base || 10), isNegative);
     };
 
-    const BigInt = Integer;
-    return BigInt;
+    const bigInt = Integer;
+
+    return bigInt;
 })();

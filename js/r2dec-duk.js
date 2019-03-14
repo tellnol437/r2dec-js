@@ -32,12 +32,27 @@ function r2dec_main(args) {
 	const Options = require('libdec2/options');
 	const Logger = require('libdec2/logger');
 	const DecData = require('libdec2/analysis/data');
+	const DecArch = require('libdec2/architectures');
+	const r2 = require('libdec2/r2');
+
 	try {
 		if (!Options.parse(args)) {
 			return; // if something was wrong, just stop
 		}
+		const archname = r2.string("e asm.arch");
+		const arch = DecArch[archname];
+		if (!arch) {
+			Logger.error(archname + ' is not currently supported.\n' +
+				'Please open an enhancement issue at https://github.com/wargio/r2dec-js/issues');
+			Logger.error('Supported architectures:');
+			Logger.error('    ' + Object.keys(DecArch).join(', '));
+			return false;
+		}
+
 		var data = DecData.create();
 		if (data) {
+			data.dump();
+			data.toIR(arch);
 			data.dump();
 		} else {
 			Logger.error("Error: no data available.\nPlease analyze the function/binary first.");

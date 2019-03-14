@@ -20,11 +20,19 @@ module.exports = (function() {
 	const Reg = require('libdec2/ir/register');
 	const Imm = require('libdec2/ir/immediate');
 
+	function _2a(x) {
+		var a = [];
+		for (var i = 0; i < x.length; i++) {
+			a[i] = x[i]
+		}
+		return a;
+	}
+
 	function Opcode(obj) {
 		Throw.isNotType(obj, "function", Opcode);
 		this.__opcode__ = obj.name;
 		this._toString = function() {
-			return "[" + [this.__opcode__].concat(Array.from(arguments)).join(' ') + "]";
+			return "[" + [this.__opcode__].concat(_2a(arguments)).join(' ') + "]";
 		};
 	}
 
@@ -278,8 +286,17 @@ module.exports = (function() {
 	 * Other
 	 *****************************************/
 
-	function Illegal() {
-		UExpr.call(this, Illegal, arguments[0]);
+	function Call() {
+		UExpr.call(this, Call, arguments[0]);
+	}
+
+	function Illegal(target) {
+		Throw.isNull(target, Illegal);
+		Opcode.call(this, Illegal);
+		this.target = target;
+		this.toString = function() {
+			return this._toString(this.target);
+		};
 	}
 
 	return {
@@ -313,5 +330,6 @@ module.exports = (function() {
 		ExtendZero: ExtendZero,
 		/* everything else */
 		Illegal: Illegal,
+		Call: Call,
 	};
 })();

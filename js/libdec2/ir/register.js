@@ -28,11 +28,15 @@ module.exports = (function() {
 	function Register(name, size, shift) {
 		Throw.isNotType(name, "string", Register);
 		Throw.isNotType(size, "number", Register);
+		Throw.isNotType(shift, "number", Register);
 		/** @type {!String} */
 		this.name = name;
 
 		/** @type {!number} */
-		this.size = size || 0;
+		this.size = size;
+
+		/** @type {!number} */
+		this.shift = shift;
 
 		/** @type {Array} */
 		this.mapped = [];

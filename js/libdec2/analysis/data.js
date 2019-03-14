@@ -16,18 +16,52 @@
  */
 
 module.exports = (function() {
+	const Logger = require('libdec2/logger');
 	const Block = require('libdec2/analysis/block');
 	const r2 = require('libdec2/r2');
 
+	function _convert_to_ir(block, arch) {
+		if (arch.pre_conversion) {
+			block.opcodes = arch.pre_conversion(block.opcodes);
+		}
+		for (var i = 0; i < block.opcodes.length; i++) {
+			block.opcodes[i] = arch.parse(block.opcodes[i]);
+		}
+		if (arch.post_conversion) {
+			block.opcodes = arch.post_conversion(block.opcodes);
+		}
+	}
+
+	/**
+	 * Decompiler Data
+	 * @param {String} name   Routine name
+	 * @param {Blocks} blocks Blocks of the routine
+	 */
 	function DecData(name, blocks) {
 		this.name = name;
 		this.blocks = blocks;
 	}
 
+	/**
+	 * Converts all the blocks data to IR
+	 */
+	DecData.prototype.toIR = function(arch) {
+		for (var i = 0; i < this.blocks.length; i++) {
+			_convert_to_ir(this.blocks[i], arch);
+		}
+	};
+
+	/**
+	 * Dumps all the decompiler data.
+	 */
 	DecData.prototype.dump = function() {
 		console.log("[DecData " + this.name);
 		for (var i = 0; i < this.blocks.length; i++) {
-			console.log("    [Block 0x" + this.blocks[i].location.toString(16) + " " + this.blocks[i].opcodes.length + "]");
+			console.log("    [Block 0x" + this.blocks[i].location.toString(16) + " " + this.blocks[i].opcodes.length);
+			this.blocks[i].opcodes.forEach(function(x) {
+				console.log("        " + x);
+			})
+			console.log("    ]");
 		}
 		console.log("]");
 	};

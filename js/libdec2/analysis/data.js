@@ -16,9 +16,15 @@
  */
 
 module.exports = (function() {
+    const bigInt = require('libdec2/libs/bigint');
+    const Optimize = require('libdec2/ir/optimize');
     const Logger = require('libdec2/logger');
     const Block = require('libdec2/analysis/block');
     const r2 = require('libdec2/r2');
+
+    function _optimize_ir(block, regs) {
+        block.ir = Optimize.solveMath(block.ir, regs);
+    }
 
     function _convert_to_ir(block, arch) {
         if (arch.pre_conversion) {
@@ -55,18 +61,59 @@ module.exports = (function() {
     };
 
     /**
+     * Optimize all the blocks data containing IR
+     */
+    DecData.prototype.optimize = function(arch) {
+        var regs = {};
+        if (arch.optimize_regs) {
+            arch.optimize_regs().forEach(function(reg) {
+                regs[reg.name] = {
+                    register: reg,
+                    added: true,
+                    value: r2.bigint("dr " + reg.name, bigInt.zero)
+                };
+            });
+        }
+        for (var i = 0; i < this.blocks.length; i++) {
+            _optimize_ir(this.blocks[i], regs);
+        }
+    };
+
+    /**
+     * Optimize all the blocks data containing IR
+     */
+    DecData.prototype.controlflow = function(arch) {
+        var regs = {};
+        if (arch.optimize_regs) {
+            arch.optimize_regs().forEach(function(reg) {
+                regs[reg.name] = {
+                    register: reg,
+                    added: true,
+                    value: r2.bigint("dr " + reg.name, bigInt.zero)
+                };
+            });
+        }
+        for (var i = 0; i < this.blocks.length; i++) {
+            _optimize_ir(this.blocks[i], regs);
+        }
+    };
+
+    /**
      * Dumps all the decompiler data.
      */
-    DecData.prototype.dump = function() {
+    DecData.prototype.dump = function(dumpIR) {
         console.log("[DecData " + this.name);
         for (var i = 0; i < this.blocks.length; i++) {
             console.log("    [Block 0x" + this.blocks[i].location.toString(16) + " " + this.blocks[i].opcodes.length);
-            this.blocks[i].opcodes.forEach(function(x) {
-                console.log("        " + x);
-            })
-            //this.blocks[i].ir.forEach(function(x) {
-            //    console.log("        " + x);
-            //})
+            if (dumpIR) {
+                this.blocks[i].ir.forEach(function(x) {
+                    console.log("        " + x);
+                });
+            } else {
+                this.blocks[i].opcodes.forEach(function(x) {
+                    console.log("        " + x);
+                });
+            }
             console.log("    ]");
         }
         console.log("]");

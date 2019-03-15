@@ -1708,6 +1708,13 @@ module.exports = (function(undefined) {
         return parseBaseFromArray(digits.map(parseValue), parseValue(base || 10), isNegative);
     };
 
+    Integer.mask256 = new Integer("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
+    Integer.mask128 = new Integer("ffffffffffffffffffffffffffffffff", 16);
+    Integer.mask64 = new Integer("ffffffffffffffff", 16);
+    Integer.mask32 = new Integer("ffffffff", 16);
+    Integer.mask16 = new Integer("ffff", 16);
+    Integer.mask8 = new Integer("ff", 16);
+
     const bigInt = Integer;
 
     return bigInt;

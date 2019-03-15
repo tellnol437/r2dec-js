@@ -16,5 +16,185 @@
  */
 
 module.exports = (function() {
-	return {};
+	const bigInt = require('libdec2/libs/bigint');
+	const Imm = require('libdec2/ir/immediate');
+	const JIR = require('libdec2/jir');
+
+	const _math_jir = [{
+			op: JIR.Add,
+			fcn: function(a, b) {
+				return b.arg1 instanceof Imm ? a.add(b.arg1.value) : a;
+			}
+		}, {
+			op: JIR.And,
+			fcn: function(a, b) {
+				return b.arg1 instanceof Imm ? a.and(b.arg1.value) : a;
+			}
+		}, {
+			op: JIR.Decrease,
+			fcn: function(a, b) {
+				return b.arg1 instanceof Imm ? a.subtract(b.arg1.value) : a;
+			}
+		}, {
+			op: JIR.Divide,
+			fcn: function(a, b) {
+				return b.arg1 instanceof Imm ? a.divide(b.arg1.value) : a;
+			}
+		}, {
+			op: JIR.Increase,
+			fcn: function(a, b) {
+				return b.arg1 instanceof Imm ? a.add(b.arg1.value) : a;
+			}
+		}, {
+			op: JIR.Module,
+			fcn: function(a, b) {
+				return b.arg1 instanceof Imm ? a.module(b.arg1.value) : a;
+			}
+		}, {
+			op: JIR.Multiply,
+			fcn: function(a, b) {
+				return b.arg1 instanceof Imm ? a.multiply(b.arg1.value) : a;
+			}
+		}, {
+			op: JIR.Negate,
+			fcn: function(a, b) {
+				return a.negate();
+			}
+		}, {
+			op: JIR.Not,
+			fcn: function(a, b) {
+				return a.not(b);
+			}
+		}, {
+			op: JIR.Or,
+			fcn: function(a, b) {
+				return b.arg1 instanceof Imm ? a.or(b.arg1.value) : a;
+			}
+		}
+		/*, {
+				op: JIR.RotateLeft,
+				fcn: function(a, b, r) {
+					// target = (arg0 << arg1) | (arg0 >> (arg2 - arg1))
+					var bits = b.arg1;
+					var hi = a.shiftLeft(b);
+				}
+			}, {
+				op: JIR.RotateRight,
+				fcn: function(a, b, r) {
+					// target = (arg0 >> arg1) | (arg0 << (arg2 - arg1))
+					var hi = a.sum(b);
+				}
+			}*/
+		, {
+			op: JIR.ShiftLeft,
+			fcn: function(a, b, r) {
+				return b.arg1 instanceof Imm ? a.shiftLeft(b.arg1).and(bigInt["mask" + r.size]) : a;
+			}
+		}, {
+			op: JIR.ShiftRight,
+			fcn: function(a, b) {
+				return b.arg1 instanceof Imm ? a.shiftRight(b.arg1) : a;
+			}
+		}, {
+			op: JIR.Subtract,
+			fcn: function(a, b) {
+				return b.arg1 instanceof Imm ? a.subtract(b.arg1.value) : a;
+			}
+		}, {
+			op: JIR.Xor,
+			fcn: function(a, b) {
+				return b.arg1 instanceof Imm ? a.xor(b.arg1.value) : a;
+			}
+		}
+	];
+
+	function _math_solver(op, regs) {
+		for (var i = 0; i < _math_jir.length; i++) {
+			if (op instanceof _math_jir[i].op && op.target == op.arg0 && regs[op.target.name]) {
+				return _math_jir[i].fcn;
+			}
+		}
+		return null;
+	}
+
+	function _regName(op, name) {
+		return op[name] ? op[name].name : null;
+	}
+
+
+	function _solve_math(ir, registers) {
+		var i, m, reginfo;
+		var new_ir = [];
+		registers = registers || {};
+		for (i = 0; i < ir.length; i++) {
+			reginfo = registers[_regName(ir[i], 'target')] ||
+				registers[_regName(ir[i], 'arg0')] ||
+				registers[_regName(ir[i], 'arg1')] ||
+				registers[_regName(ir[i], 'arg2')];
+			if (ir[i] instanceof JIR.Call || ir[i] instanceof JIR.Return) {
+				for (var key in registers) {
+					reginfo = registers[key];
+					if (reginfo.added) {
+						continue;
+					}
+					reginfo.added = true;
+					new_ir.push(new JIR.Assign(reginfo.register, new Imm(reginfo.value)));
+					console.log("################################")
+					console.log("    Call/Ret", new_ir[new_ir.length - 1].toString())
+					console.log("################################")
+				}
+			} else if (registers[_regName(ir[i], 'target')]) {
+				if (!reginfo.added) {
+					reginfo.added = true;
+					new_ir.push(new JIR.Assign(reginfo.register, new Imm(reginfo.value)));
+					console.log("################################")
+					console.log("    Assign", new_ir[new_ir.length - 1].toString())
+					console.log("################################")
+				}
+			}
+			if (ir[i] instanceof JIR.Assign && ir[i].arg0 instanceof Imm) {
+				console.log("################################")
+				console.log("    Added", ir[i].toString())
+				console.log("################################")
+				registers[ir[i].target.name] = {
+					added: false,
+					register: ir[i].target,
+					value: bigInt(ir[i].arg0.value)
+				};
+			} else {
+				var reginfo = registers[_regName(ir[i], 'target')];
+				if ((m = _math_solver(ir[i], registers)) != null) {
+					console.log("++++++++++++++++++++++++++++++++")
+					console.log("    Math", ir[i].toString())
+					console.log("       ", reginfo.value, " -> ", m(reginfo.value, ir[i], reginfo.register))
+					console.log("++++++++++++++++++++++++++++++++")
+					reginfo.value = m(reginfo.value, ir[i], reginfo.register);
+				} else {
+					console.log(ir[i].toString());
+					new_ir.push(ir[i]);
+				}
+			}
+		}
+		for (var key in registers) {
+			reginfo = registers[key];
+			if (reginfo.added) {
+				continue;
+			}
+			reginfo.added = true;
+			new_ir.push(new JIR.Assign(reginfo.register, new Imm(reginfo.value)));
+			console.log("################################")
+			console.log("    Jump", new_ir[new_ir.length - 1].toString())
+			console.log("################################")
+		}
+		console.log("--------------------------------")
+		new_ir.forEach(function(op) {
+			console.log("    " + op)
+		});
+		console.log("--------------------------------")
+		return new_ir;
+	}
+
+	return {
+		solveMath: _solve_math
+	};
 })();

@@ -18,12 +18,14 @@
 module.exports = (function() {
 	const Throw = require('libdec2/throw');
 	const Reg = require('libdec2/ir/register');
+	const Tmp = require('libdec2/ir/tempreg');
 	const Imm = require('libdec2/ir/immediate');
+	const Cnd = require('libdec2/ir/condtype');
 
 	function _2a(x) {
 		var a = [];
 		for (var i = 0; i < x.length; i++) {
-			a[i] = x[i]
+			a[i] = x[i];
 		}
 		return a;
 	}
@@ -56,7 +58,7 @@ module.exports = (function() {
 	 * @param {Reg|Imm}  arg0   Argument 0 Reg|Imm
 	 */
 	function UExpr(fcn, target) {
-		Throw.isNotObject(target, [Reg, Imm], fcn);
+		Throw.isNotObject(target, [Reg, Imm, Tmp], fcn);
 		Opcode.call(this, fcn);
 		this.target = target;
 		this.toString = function() {
@@ -71,8 +73,8 @@ module.exports = (function() {
 	 * @param {Reg|Imm}  arg0   Argument 0 Reg|Imm
 	 */
 	function BExpr(fcn, target, arg0) {
-		Throw.isNotObject(target, [Reg, Imm], fcn);
-		Throw.isNotObject(arg0, [Reg, Imm], fcn);
+		Throw.isNotObject(target, [Reg, Imm, Tmp], fcn);
+		Throw.isNotObject(arg0, [Reg, Imm, Tmp], fcn);
 		Opcode.call(this, fcn);
 		this.target = target;
 		this.arg0 = arg0;
@@ -89,9 +91,9 @@ module.exports = (function() {
 	 * @param {Reg|Imm}  arg1   Argument 1 Reg|Imm
 	 */
 	function TExpr(fcn, target, arg0, arg1) {
-		Throw.isNotObject(target, [Reg, Imm], fcn);
-		Throw.isNotObject(arg0, [Reg, Imm], fcn);
-		Throw.isNotObject(arg1, [Reg, Imm], fcn);
+		Throw.isNotObject(target, [Reg, Imm, Tmp], fcn);
+		Throw.isNotObject(arg0, [Reg, Imm, Tmp], fcn);
+		Throw.isNotObject(arg1, [Reg, Imm, Tmp], fcn);
 		Opcode.call(this, fcn);
 		this.target = target;
 		this.arg0 = arg0;
@@ -109,8 +111,8 @@ module.exports = (function() {
 	 * @param {Number}   arg1   Argument 1 Number
 	 */
 	function TNExpr(fcn, target, arg0, arg1) {
-		Throw.isNotObject(target, [Reg, Imm], fcn);
-		Throw.isNotObject(arg0, [Reg, Imm], fcn);
+		Throw.isNotObject(target, [Reg, Imm, Tmp], fcn);
+		Throw.isNotObject(arg0, [Reg, Imm, Tmp], fcn);
 		Throw.isNotType(arg1, "number", fcn);
 		Opcode.call(this, fcn);
 		this.target = target;
@@ -130,9 +132,9 @@ module.exports = (function() {
 	 * @param {Number}   arg2   Argument 2 Number
 	 */
 	function QExpr(fcn, target, arg0, arg1, arg2) {
-		Throw.isNotObject(target, [Reg, Imm], fcn);
-		Throw.isNotObject(arg0, [Reg, Imm], fcn);
-		Throw.isNotObject(arg1, [Reg, Imm], fcn);
+		Throw.isNotObject(target, [Reg, Imm, Tmp], fcn);
+		Throw.isNotObject(arg0, [Reg, Imm, Tmp], fcn);
+		Throw.isNotObject(arg1, [Reg, Imm, Tmp], fcn);
 		Throw.isNotType(arg2, "number", fcn);
 		Opcode.call(this, fcn);
 		this.target = target;
@@ -200,8 +202,8 @@ module.exports = (function() {
 
 	/* target = arg0 */
 	function Assign(target, arg0) {
-		Throw.isNotObject(target, [Reg, Imm], Assign);
-		Throw.isNotObject(arg0, [Reg, Imm], Assign);
+		Throw.isNotObject(target, [Reg, Imm, Tmp], Assign);
+		Throw.isNotObject(arg0, [Reg, Imm, Tmp], Assign);
 		Opcode.call(this, Assign);
 		this.target = target;
 		this.arg0 = arg0;
@@ -283,11 +285,48 @@ module.exports = (function() {
 	}
 
 	/*****************************************
+	 * Compare/Test
+	 *****************************************/
+
+	/* target = arg0 & arg1 */
+	function Test() {
+		TExpr.call(this, Test, arguments[0], arguments[1], arguments[2]);
+	}
+
+	/* target = arg0 - arg1 */
+	function Compare() {
+		TExpr.call(this, Compare, arguments[0], arguments[1], arguments[2]);
+	}
+
+	/*****************************************
+	 * Jump condition
+	 *****************************************/
+
+	function Condition(target, arg0) {
+		Throw.isNotObject(target, [Reg, Imm, Tmp], Condition);
+		Throw.isNotObject(arg0, [Cnd], Condition);
+		Opcode.call(this, Condition);
+		this.target = target;
+		this.arg0 = arg0;
+		this.toString = function() {
+			return this._toString(this.target, this.arg0);
+		};
+	}
+
+	/*****************************************
 	 * Other
 	 *****************************************/
 
 	function Call() {
 		UExpr.call(this, Call, arguments[0]);
+	}
+
+	function Return(target) {
+		Opcode.call(this, Return);
+		this.target = target;
+		this.toString = function() {
+			return this._toString(this.target);
+		};
 	}
 
 	function Illegal(target) {
@@ -328,8 +367,14 @@ module.exports = (function() {
 		/* signess */
 		ExtendSign: ExtendSign,
 		ExtendZero: ExtendZero,
+		/* test/compare */
+		Test: Test,
+		Compare: Compare,
+		/* jump condition */
+		Condition: Condition,
 		/* everything else */
 		Illegal: Illegal,
 		Call: Call,
+		Return: Return,
 	};
 })();

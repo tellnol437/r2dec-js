@@ -16,44 +16,59 @@
  */
 
 module.exports = (function() {
-	const Throw = require('libdec2/throw');
-	const bigInt = require('libdec2/libs/bigint');
+    const Throw = require('libdec2/throw');
+    const bigInt = require('libdec2/libs/bigint');
 
-	/**
-	 * Returns true only if the object is not null
-	 * @param  {any}     x Variable of any type
-	 * @return {boolean}
-	 */
-	function _null_ops(x) {
-		return !!x;
-	}
+    function MetaOp(asm, ir) {
+        this.asm = asm;
+        this.ir = ir;
+        this.toString = function() {
+            return this.asm + " -> " + this.ir.join(', ');
+        };
+    }
 
-	/**
-	 * Block contains microcode
-	 * @param {!bigInt}     location Location of the block
-	 */
-	function Block(location, opcodes) {
-		Throw.isNotObject(location, bigInt, Block);
-		Throw.isNotObject(opcodes, Array, Block);
-		this.location = location;
-		this.jump = null;
-		this.fail = null;
-		this.opcodes = opcodes;
-	}
+    /**
+     * Returns true only if the object is not null
+     * @param  {any}     x Variable of any type
+     * @return {boolean}
+     */
+    function _null_ops(x) {
+        return !!x;
+    }
 
-	Block.prototype.setJump = function(jump) {
-		Throw.isNotObject(jump, [bigInt, Block], Block);
-		this.jump = jump;
-	};
+    /**
+     * Block contains microcode
+     * @param {!bigInt}     location Location of the block
+     */
+    function Block(location, opcodes) {
+        Throw.isNotObject(location, bigInt, Block);
+        Throw.isNotObject(opcodes, Array, Block);
+        this.location = location;
+        this.jump = null;
+        this.fail = null;
+        this.opcodes = opcodes.map(function(x){
+            return new MetaOp(x, []);
+        });
+        this.ir = [];
+    }
 
-	Block.prototype.setFail = function(fail) {
-		Throw.isNotObject(fail, [bigInt, Block], Block);
-		this.fail = fail;
-	};
+    Block.prototype.setJump = function(jump) {
+        Throw.isNotObject(jump, [bigInt, Block], Block);
+        this.jump = jump;
+    };
 
-	Block.prototype.add = function(opcodes) {
-		this.opcodes = this.opcodes.concat(opcodes.filter(_null_ops));
-	};
+    Block.prototype.setFail = function(fail) {
+        Throw.isNotObject(fail, [bigInt, Block], Block);
+        this.fail = fail;
+    };
 
-	return Block;
+    Block.prototype.addIR = function(opcodes) {
+        this.ir = this.ir.concat(opcodes.filter(_null_ops));
+    };
+
+    Block.prototype.setMop = function(idx, opcodes) {
+        this.opcodes[idx].ir = opcodes.filter(_null_ops);
+    };
+
+    return Block;
 })();

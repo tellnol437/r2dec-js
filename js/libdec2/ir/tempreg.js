@@ -22,9 +22,7 @@ module.exports = (function() {
 
 	/**
 	 * TempReg.
-	 * @param {!String} name  TempReg name
-	 * @param {Number}  size  TempReg size in bits
-	 * @param {Number}  shift Amount of bits to shift (only for remapped regs)
+	 * @param {Number}  size  TempReg size in bits (can be 0 for unknown)
 	 * @constructor
 	 */
 	function TempReg(size) {
@@ -59,7 +57,7 @@ module.exports = (function() {
 	 * @return {String}
 	 */
 	TempReg.prototype.toString = function() {
-		return "[Tmp " + [this.name, this.size, this.mapped.length].join(' ') + "]";
+		return "[Tmp " + [this.name, this.size].join(' ') + "]";
 	};
 
 	return TempReg;

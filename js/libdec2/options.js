@@ -30,8 +30,8 @@ module.exports = (function() {
 		this.output = {
 			comment: false,
 			project: false,
-			colors: r2.bool('e scr.html'),
-			html: r2.number('e scr.color', 0) > 0,
+			html: r2.bool('e scr.html'),
+			colors: r2.number('e scr.color', 0) > 0,
 		};
 		this.analysis = {};
 		this.language = "C";
@@ -150,7 +150,7 @@ module.exports = (function() {
 		this.exception = function(exception) {
 			this.sanitize.set(false);
 			if (this.debug) {
-				console.log('Exception:', exception.stack);
+				console.log('Exception at ' + exception.lineNumber + ":", exception.stack);
 				this.dump();
 			} else {
 				console.log(

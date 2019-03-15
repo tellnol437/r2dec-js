@@ -16,99 +16,105 @@
  */
 
 module.exports = (function() {
-	const Logger = require('libdec2/logger');
-	const Block = require('libdec2/analysis/block');
-	const r2 = require('libdec2/r2');
+    const Logger = require('libdec2/logger');
+    const Block = require('libdec2/analysis/block');
+    const r2 = require('libdec2/r2');
 
-	function _convert_to_ir(block, arch) {
-		if (arch.pre_conversion) {
-			block.opcodes = arch.pre_conversion(block.opcodes);
-		}
-		for (var i = 0; i < block.opcodes.length; i++) {
-			block.opcodes[i] = arch.parse(block.opcodes[i]);
-		}
-		if (arch.post_conversion) {
-			block.opcodes = arch.post_conversion(block.opcodes);
-		}
-	}
+    function _convert_to_ir(block, arch) {
+        if (arch.pre_conversion) {
+            block.opcodes = arch.pre_conversion(block.opcodes);
+        }
+        for (var i = 0; i < block.opcodes.length; i++) {
+            var x = arch.parse(block.opcodes[i].asm);
+            x = Array.isArray(x) ? x : [x];
+            block.setMop(i, x);
+            block.addIR(x);
+        }
+        if (arch.post_conversion) {
+            block.opcodes = arch.post_conversion(block.opcodes);
+        }
+    }
 
-	/**
-	 * Decompiler Data
-	 * @param {String} name   Routine name
-	 * @param {Blocks} blocks Blocks of the routine
-	 */
-	function DecData(name, blocks) {
-		this.name = name;
-		this.blocks = blocks;
-	}
+    /**
+     * Decompiler Data
+     * @param {String} name   Routine name
+     * @param {Blocks} blocks Blocks of the routine
+     */
+    function DecData(name, blocks) {
+        this.name = name;
+        this.blocks = blocks;
+    }
 
-	/**
-	 * Converts all the blocks data to IR
-	 */
-	DecData.prototype.toIR = function(arch) {
-		for (var i = 0; i < this.blocks.length; i++) {
-			_convert_to_ir(this.blocks[i], arch);
-		}
-	};
+    /**
+     * Converts all the blocks data to IR
+     */
+    DecData.prototype.toIR = function(arch) {
+        for (var i = 0; i < this.blocks.length; i++) {
+            _convert_to_ir(this.blocks[i], arch);
+        }
+    };
 
-	/**
-	 * Dumps all the decompiler data.
-	 */
-	DecData.prototype.dump = function() {
-		console.log("[DecData " + this.name);
-		for (var i = 0; i < this.blocks.length; i++) {
-			console.log("    [Block 0x" + this.blocks[i].location.toString(16) + " " + this.blocks[i].opcodes.length);
-			this.blocks[i].opcodes.forEach(function(x) {
-				console.log("        " + x);
-			})
-			console.log("    ]");
-		}
-		console.log("]");
-	};
+    /**
+     * Dumps all the decompiler data.
+     */
+    DecData.prototype.dump = function() {
+        console.log("[DecData " + this.name);
+        for (var i = 0; i < this.blocks.length; i++) {
+            console.log("    [Block 0x" + this.blocks[i].location.toString(16) + " " + this.blocks[i].opcodes.length);
+            this.blocks[i].opcodes.forEach(function(x) {
+                console.log("        " + x);
+            })
+            //this.blocks[i].ir.forEach(function(x) {
+            //    console.log("        " + x);
+            //})
+            console.log("    ]");
+        }
+        console.log("]");
+    };
 
-	function _map_opcodes(asm) {
-		return asm.opcode;
-	}
+    function _map_opcodes(asm) {
+        return asm.opcode;
+    }
 
-	function _map_blocks(block) {
-		var b = new Block(block.offset, block.ops.map(_map_opcodes));
-		if (block.jump) {
-			b.setJump(block.jump);
-		}
-		if (block.fail) {
-			b.setFail(block.fail);
-		}
-		return b;
-	}
+    function _map_blocks(block) {
+        var b = new Block(block.offset, block.ops.map(_map_opcodes));
+        if (block.jump) {
+            b.setJump(block.jump);
+        }
+        if (block.fail) {
+            b.setFail(block.fail);
+        }
+        return b;
+    }
 
-	function _map_locations(block) {
-		return block.offset.toString(16);
-	}
+    function _map_locations(block) {
+        return block.offset.toString(16);
+    }
 
-	function _fb(address, locations) {
-		return locations.indexOf(address.toString(16));
-	}
+    function _fb(address, locations) {
+        return locations.indexOf(address.toString(16));
+    }
 
-	function _create_dec_data() {
-		var graph = r2.json('agj', [])[0];
-		if (graph) {
-			var blocks = graph.blocks.map(_map_blocks);
-			var locations = graph.blocks.map(_map_locations);
-			blocks.forEach(function(b, _, bs) {
-				var idx;
-				if (b.jump && (idx = _fb(b.jump, locations)) >= 0) {
-					b.setJump(bs[idx]);
-				}
-				if (b.fail && (idx = _fb(b.fail, locations)) >= 0) {
-					b.setFail(bs[idx]);
-				}
-			});
-			return new DecData(graph.name, blocks);
-		}
-		return null;
-	}
+    function _create_dec_data() {
+        var graph = r2.json('agj', [])[0];
+        if (graph) {
+            var blocks = graph.blocks.map(_map_blocks);
+            var locations = graph.blocks.map(_map_locations);
+            blocks.forEach(function(b, _, bs) {
+                var idx;
+                if (b.jump && (idx = _fb(b.jump, locations)) >= 0) {
+                    b.setJump(bs[idx]);
+                }
+                if (b.fail && (idx = _fb(b.fail, locations)) >= 0) {
+                    b.setFail(bs[idx]);
+                }
+            });
+            return new DecData(graph.name, blocks);
+        }
+        return null;
+    }
 
-	DecData.create = _create_dec_data;
+    DecData.create = _create_dec_data;
 
-	return DecData;
+    return DecData;
 })();

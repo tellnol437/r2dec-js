@@ -13,6 +13,10 @@ module.exports = (function(undefined) {
         if (typeof v === "undefined") {
             return Integer[0];
         }
+        if (typeof v === "string" && v.startsWith("0x")) {
+            v = v.substr(2);
+            radix = 16;
+        }
         if (typeof radix !== "undefined") {
             return +radix === 10 && !alphabet ? parseValue(v) : parseBase(v, radix, alphabet, caseSensitive);
         }

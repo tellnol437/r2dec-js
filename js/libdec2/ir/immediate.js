@@ -16,36 +16,44 @@
  */
 
 module.exports = (function() {
-	const Throw = require('libdec2/throw');
-	const bigInt = require('libdec2/libs/bigint');
+    const Throw = require('libdec2/throw');
+    const bigInt = require('libdec2/libs/bigint');
 
-	/**
-	 * Immediate value.
-	 * @param {!bigInt} value Immediate value
-	 * @constructor
-	 */
-	function Immediate(value) {
-		Throw.isNotObject(value, bigInt, Immediate);
-		/** @type {!bigInt} */
-		this.value = value;
-	}
+    /**
+     * Immediate value.
+     * @param {!bigInt} value Immediate value
+     * @constructor
+     */
+    function Immediate(value) {
+        Throw.isNotObject(value, bigInt, Immediate);
+        /** @type {!bigInt} */
+        this.value = value;
+    }
 
-	/**
-	 * Returns true if the given object is Immediate type
-	 * @param  {Object}  obj Any object
-	 * @return {Boolean}
-	 */
-	Immediate.is = function(obj) {
-		return obj instanceof Immediate;
-	};
+    /**
+     * Returns true if the given object is Immediate type
+     * @param  {Object}  obj Any object
+     * @return {Boolean}
+     */
+    Immediate.is = function(obj) {
+        return obj instanceof Immediate;
+    };
 
-	/**
-	 * returns a string
-	 * @return {String}
-	 */
-	Immediate.prototype.toString = function() {
-		return "[Imm 0x" + this.value.toString(16) + "]";
-	};
+    /**
+     * returns a string
+     * @return {String}
+     */
+    Immediate.prototype.toString = function() {
+        return "[Imm 0x" + this.value.toString(16) + "]";
+    };
 
-	return Immediate;
+    Immediate.from = function(value) {
+        Throw.isNotType(value, ["string", "number"], Immediate);
+        if (typeof value == "string" && !value.match(/^([+-]?0x[A-Fa-f\d]+$)|(^[+-]?\d+$)/)) {
+            return null;            
+        }
+        return new Immediate(new bigInt(value));
+    }
+
+    return Immediate;
 })();

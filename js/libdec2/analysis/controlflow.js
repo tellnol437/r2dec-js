@@ -17,23 +17,51 @@
 
 module.exports = (function() {
     //const Throw = require('libdec2/throw');
+    const Block = require('libdec2/analysis/block');
+    //const Flow = require('libdec2/analysis/flow');
 
-    function _only_multi_from(block) {
-        return block.from.length > 1;
+    //function _only_multi_from(block) {
+    //    //Throw.isNotObject(target, [Block], _only_multi_from);
+    //    return block.from.length > 1;
+    //}
+
+    function _find_subgroup_common_end(start, end, blocks) {
+        var subgroup = [];
+        for (var i = 0; i < blocks.length; i++) {
+            if (blocks[i].location.ge(start.location) && blocks[i].location.le(end.location)) {
+                subgroup.push(blocks[i]);
+            }
+        }
+        return subgroup;
     }
 
-    function newFlows(blocks) {
-        var join_nodes = blocks.filter(_only_multi_from);
-        join_nodes.forEach(function(x) {
-            console.log("    [Block 0x" + x.location.toString(16) + " " + x.opcodes.length);
-            x.opcodes.forEach(function(x) {
-                console.log("        " + x.asm);
-            });
-            console.log("    ]");
+    function _only_loops(block) {
+        return block.jump instanceof Block &&
+            block.jump.location.le(block.location);
+    }
+
+    function _print_block(x) {
+        console.log("[Block 0x" + x.location.toString(16) + " " + x.opcodes.length);
+        x.opcodes.forEach(function(x) {
+            console.log("    " + x.asm);
         });
+        console.log("]");
     }
+
+    //function Flows(blocks) {}
 
     return {
-        newFlows: newFlows
+        newFlows: function(blocks) {
+            var join_nodes = blocks.filter(_only_loops);
+            join_nodes = join_nodes.map(function(b, _, bs) {
+                return _find_subgroup_common_end(b.jump, b, blocks);
+            }).sort(function(a, b) {
+                return a.length - b.length;
+            });
+            join_nodes.forEach(function(a) {
+                console.log("--------------------------------------");
+                a.forEach(_print_block);
+            });
+        }
     };
 })();

@@ -56,6 +56,7 @@ module.exports = (function() {
         return "[Cond " + this.type + "]";
     };
 
+    CondType.ALWAYS = new CondType('ALWAYS');
     CondType.NE = new CondType('NE');
     CondType.EQ = new CondType('EQ');
     CondType.GT_U = new CondType('GT_U');
@@ -64,7 +65,7 @@ module.exports = (function() {
     CondType.LE_U = new CondType('LE_U');
     CondType.GE_S = new CondType('GE_S');
     CondType.LE_S = new CondType('LE_S');
-    CondType.LT_S = new CondType('LT_S');
+    CondType.GT_S = new CondType('GT_S');
     CondType.LT_S = new CondType('LT_S');
 
     return CondType;

@@ -170,7 +170,7 @@ module.exports = (function() {
 					//console.log("++++++++++++++++++++++++++++++++");
 					reginfo.value = m(reginfo.value, ir[i], reginfo.register);
 				} else {
-					console.log(ir[i].toString());
+					//console.log(ir[i].toString());
 					new_ir.push(ir[i]);
 				}
 			}

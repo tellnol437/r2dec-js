@@ -17,6 +17,7 @@
 
 module.exports = (function() {
     const Throw = require('libdec2/throw');
+    const Utils = require('libdec2/analysis/utils');
     const bigInt = require('libdec2/libs/bigint');
 
     function MetaOp(asm, ir) {
@@ -25,15 +26,6 @@ module.exports = (function() {
         this.toString = function() {
             return this.asm + " -> " + this.ir.join(', ');
         };
-    }
-
-    /**
-     * Returns true only if the object is not null
-     * @param  {any}     x Variable of any type
-     * @return {boolean}
-     */
-    function _null_ops(x) {
-        return !!x;
     }
 
     /**
@@ -72,11 +64,11 @@ module.exports = (function() {
     };
 
     Block.prototype.addIR = function(opcodes) {
-        this.ir = this.ir.concat(opcodes.filter(_null_ops));
+        this.ir = this.ir.concat(opcodes.filter(Utils.exists));
     };
 
     Block.prototype.setMop = function(idx, opcodes) {
-        this.opcodes[idx].ir = opcodes.filter(_null_ops);
+        this.opcodes[idx].ir = opcodes.filter(Utils.exists);
     };
 
     return Block;

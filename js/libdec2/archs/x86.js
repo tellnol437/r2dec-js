@@ -387,6 +387,7 @@ module.exports = (function() {
 			ops.push(new op(dst, srcA, srcB));
 			ops.push(new JIR.Write(dst, ptr, dst.size));
 		} else if (rhand.mem_access) {
+			dst = srcA = registers[lhand.token];
 			srcB = _memaccess(rhand, ops, dst.size);
 			ops.push(new op(dst, srcA, srcB));
 		} else {
@@ -406,10 +407,9 @@ module.exports = (function() {
 		var dst = registers[lhand.token] || Imm.from(lhand.token);
 		var src = registers[rhand.token] || Imm.from(rhand.token);
 		if (lhand.mem_access) {
-			var memval = new Tmp(0);
-			ops.push(new JIR.Write(src, _multi_math(lhand, ops), memval.size));
+			ops.push(new JIR.Write(src, _multi_math(lhand, ops), lhand.mem_access));
 		} else if (rhand.mem_access) {
-			ops.push(new JIR.Read(dst, _multi_math(rhand, ops), memval.size));
+			ops.push(new JIR.Read(dst, _multi_math(rhand, ops), rhand.mem_access));
 		} else {
 			ops.push(new JIR.Assign(dst, src));
 		}
@@ -890,6 +890,7 @@ module.exports = (function() {
 		parse: function(asm) {
 			var p = _parse_x86(asm);
 			if (_instructions[p.mnem]) {
+				//console.log(asm)
 				return _instructions[p.mnem](p);
 			}
 			return new JIR.Illegal(asm);

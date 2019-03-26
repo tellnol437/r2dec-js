@@ -916,7 +916,7 @@ module.exports = (function(undefined) {
     BigInteger.prototype.notEquals = function(v) {
         return this.compare(v) !== 0;
     };
-    NativeBigInt.prototype.neq = NativeBigInt.prototype.notEquals = SmallInteger.prototype.neq = SmallInteger.prototype.notEquals = BigInteger.prototype.neq = BigInteger.prototype.notEquals;
+    NativeBigInt.prototype.ne = NativeBigInt.prototype.notEquals = SmallInteger.prototype.ne = SmallInteger.prototype.notEquals = BigInteger.prototype.ne = BigInteger.prototype.notEquals;
 
     BigInteger.prototype.greater = function(v) {
         return this.compare(v) > 0;
@@ -931,12 +931,12 @@ module.exports = (function(undefined) {
     BigInteger.prototype.greaterOrEquals = function(v) {
         return this.compare(v) >= 0;
     };
-    NativeBigInt.prototype.geq = NativeBigInt.prototype.greaterOrEquals = SmallInteger.prototype.geq = SmallInteger.prototype.greaterOrEquals = BigInteger.prototype.geq = BigInteger.prototype.greaterOrEquals;
+    NativeBigInt.prototype.ge = NativeBigInt.prototype.greaterOrEquals = SmallInteger.prototype.ge = SmallInteger.prototype.greaterOrEquals = BigInteger.prototype.ge = BigInteger.prototype.greaterOrEquals;
 
     BigInteger.prototype.lesserOrEquals = function(v) {
         return this.compare(v) <= 0;
     };
-    NativeBigInt.prototype.leq = NativeBigInt.prototype.lesserOrEquals = SmallInteger.prototype.leq = SmallInteger.prototype.lesserOrEquals = BigInteger.prototype.leq = BigInteger.prototype.lesserOrEquals;
+    NativeBigInt.prototype.le = NativeBigInt.prototype.lesserOrEquals = SmallInteger.prototype.le = SmallInteger.prototype.lesserOrEquals = BigInteger.prototype.le = BigInteger.prototype.lesserOrEquals;
 
     BigInteger.prototype.isEven = function() {
         return (this.value[0] & 1) === 0;

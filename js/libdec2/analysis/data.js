@@ -20,6 +20,7 @@ module.exports = (function() {
     const Optimize = require('libdec2/ir/optimize');
     const Logger = require('libdec2/logger');
     const Block = require('libdec2/analysis/block');
+    const CtrlFlow = require('libdec2/analysis/controlflow');
     const r2 = require('libdec2/r2');
 
     function _optimize_ir(block, regs) {
@@ -80,22 +81,10 @@ module.exports = (function() {
     };
 
     /**
-     * Optimize all the blocks data containing IR
+     * Apply control flow
      */
     DecData.prototype.controlflow = function(arch) {
-        var regs = {};
-        if (arch.optimize_regs) {
-            arch.optimize_regs().forEach(function(reg) {
-                regs[reg.name] = {
-                    register: reg,
-                    added: true,
-                    value: r2.bigint("dr " + reg.name, bigInt.zero)
-                };
-            });
-        }
-        for (var i = 0; i < this.blocks.length; i++) {
-            _optimize_ir(this.blocks[i], regs);
-        }
+        var flows = CtrlFlow.newFlows(this.blocks);
     };
 
     /**

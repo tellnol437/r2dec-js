@@ -46,20 +46,29 @@ module.exports = (function() {
         this.location = location;
         this.jump = null;
         this.fail = null;
-        this.opcodes = opcodes.map(function(x){
+        this.opcodes = opcodes.map(function(x) {
             return new MetaOp(x, []);
         });
+        this.from = [];
         this.ir = [];
     }
 
     Block.prototype.setJump = function(jump) {
         Throw.isNotObject(jump, [bigInt, Block], Block);
         this.jump = jump;
+        this.setFrom(jump);
     };
 
     Block.prototype.setFail = function(fail) {
         Throw.isNotObject(fail, [bigInt, Block], Block);
         this.fail = fail;
+        this.setFrom(fail);
+    };
+
+    Block.prototype.setFrom = function(block) {
+        if (block instanceof Block && block.from.indexOf(this) < 0) {
+            block.from.push(this);
+        }
     };
 
     Block.prototype.addIR = function(opcodes) {

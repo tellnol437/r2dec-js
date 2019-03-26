@@ -359,7 +359,7 @@ module.exports = (function() {
 	}
 
 	function _memaccess(value, ops) {
-		var memval = new Tmp(0);
+		var memval = new Tmp(value.mem_access);
 		ops.push(new JIR.Read(memval, _multi_math(value, ops), memval.size));
 		return memval;
 	}
@@ -373,19 +373,28 @@ module.exports = (function() {
 	 * @returns {Object} Instruction instance representing the required operation
 	 */
 	function _math_common(p, op, numeric) {
-		var ops = [];
+		var dst, srcA, srcB, ptr, ops = [];
 		var lhand = p.opd[0];
 		var rhand = p.opd[1];
 
-		var lhand_arg = registers[lhand.token];
-		var rhand_arg = numeric ? parseInt(rhand.token) : (registers[rhand.token] || Imm.from(rhand.token));
-
-		if (rhand.mem_access) {
-			rhand_arg = _memaccess(rhand, ops, lhand_arg.size);
+		if (lhand.mem_access) {
+			// since the mem access is on the right, we have to calculate the pointer
+			// read memory, perform math operation and then write the result back
+			srcB = numeric ? parseInt(rhand.token) : (registers[rhand.token] || Imm.from(rhand.token));
+			var ptr = _multi_math(lhand, ops);
+			dst = srcA = new Tmp(lhand.mem_access);
+			ops.push(new JIR.Read(dst, ptr, dst.size));
+			ops.push(new op(dst, srcA, srcB));
+			ops.push(new JIR.Write(dst, ptr, dst.size));
+		} else if (rhand.mem_access) {
+			srcB = _memaccess(rhand, ops, dst.size);
+			ops.push(new op(dst, srcA, srcB));
+		} else {
+			dst = srcA = registers[lhand.token];
+			srcB = numeric ? parseInt(rhand.token) : (registers[rhand.token] || Imm.from(rhand.token));
+			ops.push(new op(dst, srcA, srcB));
 		}
-
-		ops.push(new op(lhand_arg, lhand_arg, rhand_arg));
-		return ops[0];
+		return ops;
 	}
 
 
@@ -846,7 +855,14 @@ module.exports = (function() {
 			return ops;
 		},
 		call: function(instr) {
-			return new JIR.Call(registers[instr.opd[0].token] || Imm.from(instr.opd[0].token));
+			var ptr, ops = [];
+			if (instr.opd[0].mem_access) {
+				ptr = _memaccess(instr.opd[0], ops);
+				ops.push(new JIR.Call(ptr));
+			} else {
+				ops.push(new JIR.Call(registers[instr.opd[0].token] || Imm.from(instr.opd[0].token)));
+			}
+			return ops;
 		},
 		ret: function(instr) {
 			return new JIR.Return();

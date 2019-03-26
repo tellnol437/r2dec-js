@@ -51,10 +51,11 @@ function r2dec_main(args) {
 
 		var data = DecData.create();
 		if (data) {
-			data.dump(false);
+			//data.dump(false);
 			data.toIR(arch);
 			data.optimize(arch);
-			data.dump(true);
+			//data.dump(true);
+			data.controlflow(arch);
 		} else {
 			Logger.error("Error: no data available.\nPlease analyze the function/binary first.");
 		}

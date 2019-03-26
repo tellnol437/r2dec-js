@@ -25,10 +25,10 @@ module.exports = (function() {
 	 * @param {Number}  size  TempReg size in bits (can be 0 for unknown)
 	 * @constructor
 	 */
-	function TempReg(size) {
+	function TempReg(size, name) {
 		Throw.isNotType(size, "number", TempReg);
 		/** @type {!String} */
-		this.name = "tmp" + (++__internal_counter);
+		this.name = (name ? name : "tmp") + (++__internal_counter);
 
 		/** @type {!number} */
 		this.size = size;

@@ -16,7 +16,7 @@
  */
 
 module.exports = (function() {
-    const Throw = require('libdec2/throw');
+    //const Throw = require('libdec2/throw');
 
     function _only_multi_from(block) {
         return block.from.length > 1;
@@ -30,7 +30,7 @@ module.exports = (function() {
                 console.log("        " + x.asm);
             });
             console.log("    ]");
-        })
+        });
     }
 
     return {

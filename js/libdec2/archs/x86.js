@@ -17,7 +17,7 @@
 
 module.exports = (function() {
 	const r2 = require('libdec2/r2');
-	const bigInt = require('libdec2/libs/bigint');
+	//const bigInt = require('libdec2/libs/bigint');
 	const JIR = require('libdec2/jir');
 	const Imm = require('libdec2/ir/immediate');
 	const Reg = require('libdec2/ir/register');
@@ -332,7 +332,7 @@ module.exports = (function() {
 			mnem: mnemonic,
 			opd: [operand1, operand2, operand3]
 		};
-	};
+	}
 
 	const math_ops = {
 		'+': JIR.Add,
@@ -381,7 +381,7 @@ module.exports = (function() {
 			// since the mem access is on the right, we have to calculate the pointer
 			// read memory, perform math operation and then write the result back
 			srcB = numeric ? parseInt(rhand.token) : (registers[rhand.token] || Imm.from(rhand.token));
-			var ptr = _multi_math(lhand, ops);
+			ptr = _multi_math(lhand, ops);
 			dst = srcA = new Tmp(lhand.mem_access);
 			ops.push(new JIR.Read(dst, ptr, dst.size));
 			ops.push(new op(dst, srcA, srcB));
@@ -885,7 +885,7 @@ module.exports = (function() {
 			return [
 				_stackptr_reg(),
 				_baseptr_reg()
-			]
+			];
 		},
 		parse: function(asm) {
 			var p = _parse_x86(asm);
@@ -894,5 +894,5 @@ module.exports = (function() {
 			}
 			return new JIR.Illegal(asm);
 		}
-	}
+	};
 })();

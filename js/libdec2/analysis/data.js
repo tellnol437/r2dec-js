@@ -18,7 +18,7 @@
 module.exports = (function() {
     const bigInt = require('libdec2/libs/bigint');
     const Optimize = require('libdec2/ir/optimize');
-    const Logger = require('libdec2/logger');
+    //const Logger = require('libdec2/logger');
     const Block = require('libdec2/analysis/block');
     const CtrlFlow = require('libdec2/analysis/controlflow');
     const r2 = require('libdec2/r2');
@@ -84,7 +84,7 @@ module.exports = (function() {
      * Apply control flow
      */
     DecData.prototype.controlflow = function(arch) {
-        var flows = CtrlFlow.newFlows(this.blocks);
+        CtrlFlow.newFlows(this.blocks);
     };
 
     /**

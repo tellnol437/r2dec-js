@@ -53,7 +53,7 @@ module.exports = (function() {
             return null;            
         }
         return new Immediate(new bigInt(value));
-    }
+    };
 
     return Immediate;
 })();

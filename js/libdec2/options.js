@@ -58,6 +58,7 @@ module.exports = (function() {
 				description: "generates the json used for the test suite",
 				set: function(self) {
 					self.issue = true;
+					r2.save();
 				}
 			},
 			"--assembly": {
@@ -112,7 +113,7 @@ module.exports = (function() {
 				}
 				this.args[argv[i]].set(this);
 			}
-			return !this.help;
+			return !(this.help || this.issue);
 		};
 
 		this.dump = function() {

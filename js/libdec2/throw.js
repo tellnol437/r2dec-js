@@ -44,6 +44,12 @@ module.exports = (function() {
 		}
 	}
 
+	function IsLessThan(a, b, fcn) {
+		if (a < b) {
+			throw new Error('Argument ' + a + ' < ' + b + ' (' + fcn.name + ').');
+		}
+	}
+
 	function IsNotType(x, type, fcn) {
 		_check_array(type, function(t) {
 			return typeof x == t;
@@ -61,5 +67,6 @@ module.exports = (function() {
 		isNotType: IsNotType,
 		isNotObject: IsNotObject,
 		isGt: IsGreaterThan,
+		isLt: IsLessThan,
 	};
 })();

@@ -24,55 +24,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Global data accessible from everywhere.
- * @type {Object}
- */
-var Global = {
-    context: null,
-    evars: null,
-    printer: null
-};
-
-/**
- * Imports.
- */
-var libdec = require('libdec/libdec');
-var r2util = require('libdec/r2util');
-
-/**
- * r2dec main function.
- * @param  {String} filename - Issue filename to analyze (relative/fullpath)
- */
 function r2dec_main(filename) {
-    try {
-        // imports
-        var Printer = require('libdec/printer');
-        if (filename) {
-            var jsonstr = read_file(filename).trim();
-            var data = r2util.dataTestSuite(jsonstr);
-            Global.evars = new r2util.evarsTestSuite(data);
-            Global.argdb = data.argdb;
-            Global.printer = new Printer();
+    const Options = require('libdec2/options');
+    const Logger = require('libdec2/logger');
+    const DecData = require('libdec2/analysis/data');
+    const DecArch = require('libdec2/architectures');
+    const r2 = require('libdec2/r2test');
 
-            var architecture = libdec.archs[data.arch];
-            Global.context = new libdec.context();
-            // af seems to break renaming.
-            /* asm.pseudo breaks things.. */
-            if (data.graph && data.graph.length > 0) {
-                var p = new libdec.core.session(data, architecture);
-                var arch_context = architecture.context(data);
-                libdec.core.analysis.pre(p, architecture, arch_context);
-                libdec.core.decompile(p, architecture, arch_context);
-                libdec.core.analysis.post(p, architecture, arch_context);
-                libdec.core.print(p);
-            } else {
-                console.log('Error: no data available.\nPlease analyze the function/binary first.');
-            }
+    try {
+        r2.load(filename);
+
+        const archname = r2.string("e asm.arch");
+        const arch = DecArch[archname];
+        if (!arch) {
+            Logger.error(archname + ' is not currently supported.\n' +
+                'Please open an enhancement issue at https://github.com/wargio/r2dec-js/issues');
+            Logger.error('Supported architectures:');
+            Logger.error('    ' + Object.keys(DecArch).join(', '));
+            return false;
+        }
+
+        var data = DecData.create();
+        if (data) {
+            //data.dump(false);
+            data.toIR(arch);
+            data.optimize(arch);
+            //data.dump(true);
+            data.controlflow(arch);
         } else {
-            console.log('missing JSON to test.');
+            Logger.error("Error: no data available.\nPlease analyze the function/binary first.");
         }
     } catch (e) {
-        console.log('Exception:', e.stack);
+        Options.exception(e);
     }
 }

@@ -19,6 +19,16 @@ module.exports = (function() {
 	const bigInt = require('libdec2/libs/bigint');
 	const _JSON = require('libdec2/libs/json64');
 
+	var _internal_data = null;
+
+	function r2cmd(x) {
+		if (!_internal_data[x]) {
+			console.log("trying to load '" + x + "'.");
+			return null;
+		}
+		return _internal_data[x];
+	}
+
 	function r2str(value, multiline) {
 		var x = r2cmd(value);
 		return multiline ? x.replace(/\n/g, '') : x.trim();
@@ -69,53 +79,11 @@ module.exports = (function() {
 	}
 
 	function Sanitize() {
-		this.ucase = r2bool('e asm.ucase');
-		this.pseudo = r2bool('e asm.pseudo');
-		this.capitalize = r2bool('e asm.capitalize');
-		this.set = function(enable) {
-			r2dec_sanitize(enable, 'asm.ucase', this.ucase, 'false');
-			r2dec_sanitize(enable, 'asm.pseudo', this.pseudo, 'false');
-			r2dec_sanitize(enable, 'asm.capitalize', this.capitalize, 'false');
-		};
+		this.set = function(enable) {};
 	}
 
-	/**
-	 *  R2DEC DEBUG FEATURE
-	 */
-
-	function _populate_from_obj(cmd, subcmd, todata) {
-		var i, t;
-		t = r2json(cmd);
-		for (i in t) {
-			todata[subcmd + " " + i] = t[i];
-		}
-	}
-
-	function _populate(cmd, todata) {
-		todata[cmd] = r2str(cmd);
-	}
-
-	function _populate_json(cmd, todata) {
-		todata[cmd] = r2json(cmd);
-	}
-
-	function save() {
-		var data = {};
-		_populate_from_obj("drj", "dr", data);
-		_populate("e asm.arch", data);
-		_populate("e asm.bits", data);
-		_populate("e r2dec.debug", data);
-		_populate("e r2dec.theme", data);
-		_populate("e r2dec.view.assembly", data);
-		_populate("e r2dec.view.casts", data);
-		_populate("e scr.html", data);
-		_populate("e scr.color", data);
-		_populate("s", data);
-		_populate_json("izj", data);
-		_populate_json("isj", data);
-		_populate_json("agj", data);
-		data["i~^file[1:0]"] = "issue";
-		console.log(_JSON.stringify(data, "\t"));
+	function load(filename) {
+		_internal_data = _JSON.parse(read_file(filename).trim());
 	}
 
 	return {
@@ -125,6 +93,6 @@ module.exports = (function() {
 		bigint: r2bigint,
 		bool: r2bool,
 		sanitize: Sanitize,
-		save: save,
+		load: load,
 	};
 })();

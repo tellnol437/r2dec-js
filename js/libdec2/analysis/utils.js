@@ -22,11 +22,11 @@ module.exports = (function() {
 	 * @param  {any}     x Variable of any type
 	 * @return {boolean}
 	 */
-	function exists(x) {
+	function toBool(x) {
 		return !!x;
 	}
 
 	return {
-		exists: exists
+		toBool: toBool
 	};
 })();

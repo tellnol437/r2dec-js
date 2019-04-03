@@ -418,10 +418,10 @@ module.exports = (function() {
 
 	const _instructions = {
 		inc: function(instr) {
-			return new JIR.Increase(registers[instr.opd[0]], '1');
+			return new JIR.Increase(registers[instr.opd[0].token], Imm.from(1));
 		},
 		dec: function(instr) {
-			return new JIR.Decrease(registers[instr.opd[0]], '1');
+			return new JIR.Decrease(registers[instr.opd[0].token], Imm.from(1));
 		},
 		cld: function(instr) {
 			return [];

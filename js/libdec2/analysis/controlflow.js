@@ -18,12 +18,19 @@
 module.exports = (function() {
     //const Throw = require('libdec2/throw');
     const Block = require('libdec2/analysis/block');
-    //const Flow = require('libdec2/analysis/flow');
+    const Flow = require('libdec2/analysis/flow');
+    const Utils = require('libdec2/analysis/utils');
 
     //function _only_multi_from(block) {
     //    //Throw.isNotObject(target, [Block], _only_multi_from);
     //    return block.from.length > 1;
     //}
+
+    function _is_while_loop(last, from) {
+        return last.from.filter(function(x) {
+            return x.location.lt(from);
+        }).length > 0;
+    }
 
     function _find_subgroup_common_end(start, end, blocks) {
         var subgroup = [];
@@ -40,6 +47,11 @@ module.exports = (function() {
             block.jump.location.le(block.location);
     }
 
+    function _only_cond_jumps(block) {
+        return block.jump instanceof Block && !!block.fail &&
+            block.jump.location.gt(block.location);
+    }
+
     function _print_block(x) {
         console.log("[Block 0x" + x.location.toString(16) + " " + x.opcodes.length);
         x.opcodes.forEach(function(x) {
@@ -54,6 +66,7 @@ module.exports = (function() {
         newFlows: function(blocks) {
             var join_nodes = blocks.filter(_only_loops);
             join_nodes = join_nodes.map(function(b, _, bs) {
+                // looking first to while loops
                 return _find_subgroup_common_end(b.jump, b, blocks);
             }).sort(function(a, b) {
                 return a.length - b.length;
@@ -62,6 +75,26 @@ module.exports = (function() {
                 console.log("--------------------------------------");
                 a.forEach(_print_block);
             });
+            var while_loops = join_nodes.map(function(n, _, ns) {
+                var last = n[n.length - 1];
+                if (_is_while_loop(last, n[0].location)) {
+                    return new Flow.While(null, n);
+                }
+                return new Flow.DoWhile(null, n);
+            });
+            console.log(while_loops);
+            //next only if/else
+            console.log("--------------------------------------");
+            join_nodes = blocks.filter(_only_cond_jumps);
+            join_nodes.forEach(_print_block);
+            var if_else = join_nodes.map(function(n, _, ns) {
+                var last = n[n.length - 1];
+                if (_is_while_loop(last, n[0].location)) {
+                    return new Flow.If(null, n);
+                }
+                return null;
+            }).filter(Utils.toBool);
+            console.log(if_else);
         }
     };
 })();

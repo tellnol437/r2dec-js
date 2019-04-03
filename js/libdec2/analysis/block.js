@@ -64,11 +64,11 @@ module.exports = (function() {
     };
 
     Block.prototype.addIR = function(opcodes) {
-        this.ir = this.ir.concat(opcodes.filter(Utils.exists));
+        this.ir = this.ir.concat(opcodes.filter(Utils.toBool));
     };
 
     Block.prototype.setMop = function(idx, opcodes) {
-        this.opcodes[idx].ir = opcodes.filter(Utils.exists);
+        this.opcodes[idx].ir = opcodes.filter(Utils.toBool);
     };
 
     return Block;

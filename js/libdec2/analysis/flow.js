@@ -20,33 +20,61 @@ module.exports = (function() {
     //const Utils = require('libdec2/analysis/utils');
     //const Block = require('libdec2/analysis/block');
 
-    function If(condition) {
+    function If(condition, body) {
         this.condition = condition;
+        this.body = body;
+        this.toString = function() {
+            return "If(...){...}";
+        };
     }
 
-    function ElseIf(condition) {
+    function ElseIf(condition, body) {
         this.condition = condition;
+        this.body = body;
+        this.toString = function() {
+            return "ElseIf(...){...}";
+        };
     }
 
-    function Else() {
+    function Else(body) {
+        this.body = body;
+        this.toString = function() {
+            return "Else{...}";
+        };
     }
 
-    function DoWhile(condition) {
+    function DoWhile(condition, body) {
         this.condition = condition;
+        this.body = body;
+        this.toString = function() {
+            return "Do{...}While(...);";
+        };
     }
 
-    function While(condition) {
+    function While(condition, body) {
         this.condition = condition;
+        this.body = body;
+        this.toString = function() {
+            return "While(...){...}";
+        };
     }
 
-    function For(preloop, condition, postloop) {
+    function For(preloop, condition, postloop, body) {
         this.preloop = preloop;
         this.condition = condition;
         this.postloop = postloop;
+        this.body = body;
+        this.toString = function() {
+            return "For(.;.;.){...}";
+        };
     }
 
-    function Switch(toswitch) {
+    function Switch(toswitch, jumptbl) {
         this.toswitch = toswitch;
+        this.jumptbl = jumptbl;
+        this.toString = function() {
+            return "Switch(...){...}";
+        };
     }
 
     return {
